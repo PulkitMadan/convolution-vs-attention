@@ -1,0 +1,1 @@
+Directory with utility scripts, such as argument parsing and path definitions

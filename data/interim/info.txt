@@ -1,0 +1,2 @@
+Intermediate data that has been transformed, but not yet ready to be used as model input.
+Basically "Work in progress" data.

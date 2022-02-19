@@ -1,0 +1,1 @@
+Directory for trained and serialized models (eg .pkl, .pt) files
