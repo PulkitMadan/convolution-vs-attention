@@ -1,0 +1,21 @@
+name: ift6759
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.6
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - requests
+  - opencv
+  - tqdm
+  - lxml
+  - plotly
+  - setuptools
+  - ipykernel
+  - ipywidgets
+  - jupyterlab>=3.0.0
+  - ipdb
+  - scikit-learn
+  - pytorch
