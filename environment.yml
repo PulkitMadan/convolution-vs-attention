@@ -1,6 +1,7 @@
 name: ift6759
 channels:
   - conda-forge
+  - pytorch
 dependencies:
   - python>=3.6
   - numpy
@@ -19,3 +20,6 @@ dependencies:
   - ipdb
   - scikit-learn
   - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit=11.3
