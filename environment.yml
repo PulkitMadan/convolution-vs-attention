@@ -1,9 +1,9 @@
 name: ift6759
 channels:
-  - conda-forge
   - pytorch
+  - conda-forge
 dependencies:
-  - python>=3.6
+  - python>=3.7
   - numpy
   - pandas
   - matplotlib
