@@ -113,6 +113,7 @@ Create virtual environment
 * with venv: 
 ```bash
   python3 -m venv /path-to-new-virtual-env/<env_name>
+  (or virtualenv /path-to-new-virtual-env/<env_name>)
   source /path-to-new-virtual-env/<env_name>/bin/activate
   pip install -r requirements.txt
 ```
@@ -144,11 +145,12 @@ If you make updates to your conda `environment.yml`, you can use the update comm
 
     conda env update --file environment.yml    
 
-You can create a new environment file using the `create` command:
+You can create a new environment/requirements file using the commands below:
 
     conda env export > environment.yml
-
-
+    conda list -e > requirements.txt
+    pip list --format=freeze > requirements.txt
+    
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file
