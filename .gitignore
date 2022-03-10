@@ -4,6 +4,7 @@
 *.tar.gz
 *.pkl
 *.json
+data/hymenoptera_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
