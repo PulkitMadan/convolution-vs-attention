@@ -116,6 +116,19 @@ def save_class_sample(class_label, train_size=500, val_test_ratio=0.1, output_pa
         img.save(file_path)
 
 
+def fix_val_test_numbering(output_path=OUTPUT_PATH):
+    val_files = glob.glob(os.path.join(output_path, 'val', f'val_*_*.JPEG'))
+    val_files.sort()
+    test_files = glob.glob(os.path.join(output_path, 'test', f'test_*_*.JPEG'))
+    test_files.sort()
+    for idx, file in enumerate(val_files):
+        new_name = file.rsplit('_', 1)[0] + f'_{idx}.JPEG'
+        os.rename(file, new_name)
+    for idx, file in enumerate(test_files):
+        new_name = file.rsplit('_', 1)[0] + f'_{idx}.JPEG'
+        os.rename(file, new_name)
+
+
 def save_all_class(train_size=500, val_test_ratio=0.1, output_path=OUTPUT_PATH):
     assert train_size >= (
             val_test_ratio * 100), f'Sample size should be at least {(val_test_ratio * 100)} image per class'
@@ -127,7 +140,8 @@ def save_all_class(train_size=500, val_test_ratio=0.1, output_path=OUTPUT_PATH):
     for class_label in tqdm(labels, desc='Classes'):
         print(f'\n {class_label}')
         save_class_sample(class_label, train_size, val_test_ratio, output_path)
+    fix_val_test_numbering()
 
 
 if __name__ == '__main__':
-    save_all_class()
+    fix_val_test_numbering()
