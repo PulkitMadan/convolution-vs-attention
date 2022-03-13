@@ -1,18 +1,21 @@
 #!/usr/bin/env python
-import os
 import argparse
-from function import adaptive_instance_normalization
-import net
-from pathlib import Path
-from PIL import Image
+import os
 import random
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torchvision.transforms
+from PIL import Image
 from torchvision.utils import save_image
 from tqdm import tqdm
 
-parser = argparse.ArgumentParser(description='This script applies the AdaIN style transfer method to arbitrary datasets.')
+import net
+from function import adaptive_instance_normalization
+
+parser = argparse.ArgumentParser(
+    description='This script applies the AdaIN style transfer method to arbitrary datasets.')
 parser.add_argument('--content-dir', type=str,
                     help='Directory path to a batch of content images')
 parser.add_argument('--style-dir', type=str,
@@ -26,7 +29,8 @@ parser.add_argument('--num-styles', type=int, default=1, help='Number of styles 
 parser.add_argument('--alpha', type=float, default=1.0,
                     help='The weight that controls the degree of \
                           stylization. Should be between 0 and 1')
-parser.add_argument('--extensions', nargs='+', type=str, default=['png', 'jpeg', 'jpg'], help='List of image extensions to scan style and content directory for (case sensitive), default: png, jpeg, jpg')
+parser.add_argument('--extensions', nargs='+', type=str, default=['png', 'jpeg', 'jpg'],
+                    help='List of image extensions to scan style and content directory for (case sensitive), default: png, jpeg, jpg')
 
 # Advanced options
 parser.add_argument('--content-size', type=int, default=0,
@@ -38,6 +42,7 @@ parser.add_argument('--style-size', type=int, default=512,
 parser.add_argument('--crop', type=int, default=0,
                     help='If set to anything else than 0, center crop of this size will be applied to the content image \
                     after resizing in order to create a squared image (default: 0)')
+
 
 # random.seed(131213)
 
@@ -51,6 +56,7 @@ def input_transform(size, crop):
     transform = torchvision.transforms.Compose(transform_list)
     return transform
 
+
 def style_transfer(vgg, decoder, content, style, alpha=1.0):
     assert (0.0 <= alpha <= 1.0)
     content_f = vgg(content)
@@ -58,6 +64,7 @@ def style_transfer(vgg, decoder, content, style, alpha=1.0):
     feat = adaptive_instance_normalization(content_f, style_f)
     feat = feat * alpha + content_f * (1 - alpha)
     return decoder(feat)
+
 
 def main():
     args = parser.parse_args()
@@ -113,7 +120,6 @@ def main():
     content_tf = input_transform(args.content_size, args.crop)
     style_tf = input_transform(args.style_size, 0)
 
-
     # disable decompression bomb errors
     Image.MAX_IMAGE_PIXELS = None
     skipped_imgs = []
@@ -147,24 +153,25 @@ def main():
                     out_filename = content_name + '-stylized-' + style_name + content_path.suffix
                     output_name = out_dir.joinpath(out_filename)
 
-                    save_image(output, output_name, padding=0) #default image padding is 2.
+                    save_image(output, output_name, padding=0)  # default image padding is 2.
                     style_img.close()
                 content_img.close()
             except OSError as e:
-                print('Skipping stylization of %s due to an error' %(content_path))
+                print('Skipping stylization of %s due to an error' % (content_path))
                 skipped_imgs.append(content_path)
                 continue
             except RuntimeError as e:
-                print('Skipping stylization of %s due to an error' %(content_path))
+                print('Skipping stylization of %s due to an error' % (content_path))
                 skipped_imgs.append(content_path)
                 continue
             finally:
                 pbar.update(1)
 
-    if(len(skipped_imgs) > 0):
+    if (len(skipped_imgs) > 0):
         with open(output_dir.joinpath('skipped_imgs.txt'), 'w') as f:
             for item in skipped_imgs:
                 f.write("%s\n" % item)
+
 
 if __name__ == '__main__':
     main()

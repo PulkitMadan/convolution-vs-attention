@@ -9,9 +9,10 @@ import glob
 import os
 import pickle
 from pathlib import Path
-from tqdm import tqdm
+
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
 from src.data import Human16ToTinyImage
 
@@ -22,13 +23,24 @@ converter = Human16ToTinyImage.ClassConverter()
 FILE_CACHE = {}
 
 
-def unpickle(file):
+def unpickle(file: str) -> dict:
+    """
+    Unpickles a file and returns content as a dict
+    :param file:
+    :return: dict
+    """
     with open(file, 'rb') as fo:
         dict = pickle.load(fo)
     return dict
 
 
-def load_databatch(file_path, img_size=64):
+def load_databatch(file_path: str, img_size: int = 64) -> tuple:
+    """
+    Unpickles and loads the data of a batch file as downloaded in https://image-net.org/download-images.php; namely the downsampled 64x64 version
+    :param file_path: path to batch file as a string
+    :param img_size: Size of the image. Likely 32 or 64 if using downsampled imagenet
+    :return: tuple of image data (batch_size x (img_size,img_size,channel)) and labels (batch_size)
+    """
     d = unpickle(file_path)
     img_size2 = img_size * img_size
     x, y = d['data'], d['labels']
@@ -38,13 +50,28 @@ def load_databatch(file_path, img_size=64):
 
 
 def get_file_list(train_file_pattern: str = os.path.join(DATA_PATH, '**', 'train_data_batch_[0-9]'),
-                  val_file_pattern: str = os.path.join(DATA_PATH, 'val_data')):
+                  val_file_pattern: str = os.path.join(DATA_PATH, 'val_data')) -> tuple:
+    """
+    Return a list of file paths that match the default name patterns of downloads from Imagenet.
+    Example: data_path/somedirs.../train_data_batch0
+    :param train_file_pattern: glob style regex for train files
+    :param val_file_pattern: glob style regex for val files
+    :return: tuple of lists of file paths for train and val files
+    """
     train_files = glob.glob(train_file_pattern)
     val_files = glob.glob(val_file_pattern)
     return train_files, val_files
 
 
-def get_class_sample(file_list, class_label, sample_size):
+def get_class_sample(file_list: list, class_label: str, sample_size: int) -> tuple:
+    """
+    Get a sample_sized for 1 class. Opens as many batch_files as necessary to obtain the sample_size of this class.
+    Caches every newly opened batch file, hence expect first few calls to be longer than subsequent ones.
+    :param file_list: List of batch files
+    :param class_label: class of interest
+    :param sample_size: size of returned sample
+    :return: stacked sample (sample_size x (img_size,img_size,channel) and labels (sample_size)
+    """
     stacked_data, stacked_labels = None, None
     class_index = converter.imgnet_id_to_indices[class_label]
     for idx, batch_file in enumerate(file_list):
@@ -73,7 +100,18 @@ def get_class_sample(file_list, class_label, sample_size):
     return stacked_data, stacked_labels
 
 
-def save_class_sample(class_label, train_size=500, val_test_ratio=0.1, output_path=OUTPUT_PATH):
+def save_class_sample(class_counter: int, class_label: str, train_size: int = 500, val_test_ratio: float = 0.1,
+                      output_path: str = OUTPUT_PATH) -> None:
+    """
+    Wrapper function around get_class_sample. Get the sample for a single class and saves it in the dir structure.
+    Total sample size is train_size + %ratio necessary for val and test sets.
+    :param class_counter: counts the current class being processed. Used for numbering the val and tests images
+    :param class_label: current class
+    :param train_size: size of train set
+    :param val_test_ratio: Ratio of the train set that will be extra data required for val and test.
+    :param output_path: path to save images
+    :return: None
+    """
     assert train_size >= (
             val_test_ratio * 100), f'Sample size should be at least {(val_test_ratio * 100)} image per class'
     assert train_size % (val_test_ratio * 100) == 0, 'Sample size should be divisible by 10'
@@ -104,32 +142,26 @@ def save_class_sample(class_label, train_size=500, val_test_ratio=0.1, output_pa
     # Save val files
     upper_limit = int((train_size + train_size * val_test_ratio))
     for idx, img in enumerate(stacked_data[train_size:upper_limit, :]):
-        file_path = os.path.join(output_path, 'val', f'val_{class_label}_{idx}.JPEG')
+        file_path = os.path.join(output_path, 'val', f'val_{class_label}_{int(50 * class_counter + idx)}.JPEG')
         img = Image.fromarray(img)
         img.save(file_path)
 
     # Save test files
     low_limit = int(train_size + train_size * val_test_ratio)
     for idx, img in enumerate(stacked_data[low_limit:, :]):
-        file_path = os.path.join(output_path, 'test', f'test_{class_label}_{idx}.JPEG')
+        file_path = os.path.join(output_path, 'test', f'test_{class_label}_{int(50 * class_counter + idx)}.JPEG')
         img = Image.fromarray(img)
         img.save(file_path)
 
 
-def fix_val_test_numbering(output_path=OUTPUT_PATH):
-    val_files = glob.glob(os.path.join(output_path, 'val', f'val_*_*.JPEG'))
-    val_files.sort()
-    test_files = glob.glob(os.path.join(output_path, 'test', f'test_*_*.JPEG'))
-    test_files.sort()
-    for idx, file in enumerate(val_files):
-        new_name = file.rsplit('_', 1)[0] + f'_{idx}.JPEG'
-        os.rename(file, new_name)
-    for idx, file in enumerate(test_files):
-        new_name = file.rsplit('_', 1)[0] + f'_{idx}.JPEG'
-        os.rename(file, new_name)
-
-
-def save_all_class(train_size=500, val_test_ratio=0.1, output_path=OUTPUT_PATH):
+def save_all_class(train_size: int = 500, val_test_ratio: float = 0.1, output_path: str = OUTPUT_PATH) -> None:
+    """
+    Wrapper function around save_class_sample. Calls it for every relevent class as defined in Human16ToTinyImage.py
+    :param train_size: size of train set
+    :param val_test_ratio: Ratio of the train set that will be extra data required for val and test.
+    :param output_path: path to save images
+    :return: None
+    """
     assert train_size >= (
             val_test_ratio * 100), f'Sample size should be at least {(val_test_ratio * 100)} image per class'
     assert train_size % (val_test_ratio * 100) == 0, 'Sample size should be divisible by 10'
@@ -137,11 +169,12 @@ def save_all_class(train_size=500, val_test_ratio=0.1, output_path=OUTPUT_PATH):
     # I sort them to know from where to start back if the process crashes
     labels = list(converter.imgnet_id_to_human16.keys())
     labels.sort()
+    class_counter = 0
     for class_label in tqdm(labels, desc='Classes'):
         print(f'\n {class_label}')
-        save_class_sample(class_label, train_size, val_test_ratio, output_path)
-    fix_val_test_numbering()
+        save_class_sample(class_counter, class_label, train_size, val_test_ratio, output_path)
+        class_counter += 1
 
 
 if __name__ == '__main__':
-    fix_val_test_numbering()
+    save_all_class()
