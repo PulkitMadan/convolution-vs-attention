@@ -2,6 +2,7 @@ name: ift6759
 channels:
   - pytorch
   - conda-forge
+  - huggingface
 dependencies:
   - python>=3.7
   - numpy
@@ -24,3 +25,6 @@ dependencies:
   - torchaudio
   - cudatoolkit=11.3
   - einops=0.4.1
+  - huggingface_hub
+  - torchinfo
+  - transformers
