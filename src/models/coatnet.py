@@ -98,7 +98,7 @@ class MBConv(nn.Module):
                 nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(oup),
             )
-        
+
         self.conv = PreNorm(inp, self.conv, nn.BatchNorm2d)
 
     def forward(self, x):
@@ -153,7 +153,7 @@ class Attention(nn.Module):
         relative_bias = self.relative_bias_table.gather(
             0, self.relative_index.repeat(1, self.heads))
         relative_bias = rearrange(
-            relative_bias, '(h w) c -> 1 c h w', h=self.ih*self.iw, w=self.ih*self.iw)
+            relative_bias, '(h w) c -> 1 c h w', h=self.ih * self.iw, w=self.ih * self.iw)
         dots = dots + relative_bias
 
         attn = self.attend(dots)
@@ -201,7 +201,8 @@ class Transformer(nn.Module):
 
 
 class CoAtNet(nn.Module):
-    def __init__(self, image_size, in_channels, num_blocks, channels, num_classes=1000, block_types=['C', 'C', 'T', 'T']):
+    def __init__(self, image_size, in_channels, num_blocks, channels, num_classes=1000,
+                 block_types=['C', 'C', 'T', 'T']):
         super().__init__()
         ih, iw = image_size
         block = {'C': MBConv, 'T': Transformer}
@@ -242,32 +243,32 @@ class CoAtNet(nn.Module):
 
 
 def coatnet_0():
-    num_blocks = [2, 2, 3, 5, 2]            # L
-    channels = [64, 96, 192, 384, 768]      # D
+    num_blocks = [2, 2, 3, 5, 2]  # L
+    channels = [64, 96, 192, 384, 768]  # D
     return CoAtNet((224, 224), 3, num_blocks, channels, num_classes=1000)
 
 
 def coatnet_1():
-    num_blocks = [2, 2, 6, 14, 2]           # L
-    channels = [64, 96, 192, 384, 768]      # D
+    num_blocks = [2, 2, 6, 14, 2]  # L
+    channels = [64, 96, 192, 384, 768]  # D
     return CoAtNet((224, 224), 3, num_blocks, channels, num_classes=1000)
 
 
 def coatnet_2():
-    num_blocks = [2, 2, 6, 14, 2]           # L
-    channels = [128, 128, 256, 512, 1026]   # D
+    num_blocks = [2, 2, 6, 14, 2]  # L
+    channels = [128, 128, 256, 512, 1026]  # D
     return CoAtNet((224, 224), 3, num_blocks, channels, num_classes=1000)
 
 
 def coatnet_3():
-    num_blocks = [2, 2, 6, 14, 2]           # L
-    channels = [192, 192, 384, 768, 1536]   # D
+    num_blocks = [2, 2, 6, 14, 2]  # L
+    channels = [192, 192, 384, 768, 1536]  # D
     return CoAtNet((224, 224), 3, num_blocks, channels, num_classes=1000)
 
 
 def coatnet_4():
-    num_blocks = [2, 2, 12, 28, 2]          # L
-    channels = [192, 192, 384, 768, 1536]   # D
+    num_blocks = [2, 2, 12, 28, 2]  # L
+    channels = [192, 192, 384, 768, 1536]  # D
     return CoAtNet((224, 224), 3, num_blocks, channels, num_classes=1000)
 
 
