@@ -1,97 +1,155 @@
 """
 A script to train a machine learning model on tinyimagenet
 """
+#imports
+from __future__ import print_function, division
 from argparse import ArgumentParser
 
-import numpy as np
-import pandas as pd
+import torch
+import torch.nn as nn
+import os
+import torch.backends.cudnn as cudnn
+from torchvision import models, utils #double naming Warning
+from torchinfo import summary
 
+from sklearn.metrics import confusion_matrix, classification_report
 
+#import local classes/functions
+from models.coatnet import coatnet_0
+from utils.utils import seed_all, freemem
+from data.load_data import print_datamap, dataload
+from models.default_train import model_default_train, model_save_load
+from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model
+
+cudnn.benchmark = True
+
+#plt.ion()   # interactive mode
+
+#set device
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(f'device: {device}')
+print(torch.cuda.device_count())
+print(torch.cuda.get_device_name(0))
+
+#seed for reproducibility
+rng = seed_all(123)
+
+#defaults
+batch_size_default = 32 #geirhos used 256 (could use if memory available)
+class_size = 207
+
+#args
 def add_args(parser):
     """
     Add arguments to parser
     """
     parser.add_argument(
         "--train",
-        default=None,
-        type=bool,
+        default=False,
+        action='store_true', #'store_false' if want default to false
         help="Train or Test",
     )
     parser.add_argument(
         "--model",
-        default=None,
+        default='resnet',
         type=str,
-        help="model name",
+        help="Model name",
+    )
+    parser.add_argument(
+        "--pretrain",
+        default=False,
+        action='store_true',
+        help="Load pretrained model parameters",
+    )
+    parser.add_argument(
+        "--load",
+        default=False, #should be set to true when testing
+        action='store_true',
+        help="Load saved model parameters",
     )
     return parser
 
-#main
+#main function
 def main(args):
-    #initialize model
+
+    #print tests
+    #print_datamap()
+    print(args)
+    print()
+
+    #load data
+    _,dataloaders,dataset_sizes= dataload(batch_size=batch_size_default)
+    
+    # initialize model
     if args.model =='resnet':
-        res50 = models.resnet50(pretrained=True)
-        num_ftrs = res50.fc.in_features
-        #adapt to 224x224 resolution
-        res50 = nn.Sequential(nn.AdaptiveAvgPool2d((224,224)),res50)
-        # Here the size of each output sample is set to class_size
-        res50[1].fc = nn.Linear(num_ftrs, class_size)
-        #print(res50)
+        net = models.resnet50(pretrained=args.pretrain)
+        # Set the size of each output sample to class_size
+        net.fc = nn.Linear(net.fc.in_features, class_size)
+    #no model for vit or convnext on torchvision yet
+    elif args.model =='vit':
+        net = models.vit_b_32(pretrained=args.pretrain)
+        net.heads.head = nn.Linear(in_features=net.heads.head.in_features, out_features=class_size, bias=True)
+    elif args.model =='convnext':
+        net = models.convnext_small(pretrained=args.pretrain)
+        net.classifier[2] = nn.Linear(in_features=net.classifier[2].in_features, out_features=class_size, bias=True)
+    elif args.model =='coatnet':
+        #no pretrained models yet
+        net = coatnet_0()
+        net.fc = nn.Linear(in_features=net.fc.in_features, out_features=class_size, bias=True)
+    
+    print(f'Training on {args.model}')
+    # Load model from save to scratch, if granted and exist
+    model_name = args.model
+    home_path = os.path.expanduser('~')
+    path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+    print(path_to_model)
 
+    if os.path.exists(path_to_model) and args.load:
+        print('Model loaded!')
+        net = model_save_load(save=False,model=net,path=path_to_model)
 
-
-    # Training model (load previous save)    
+    # Training model
     if args.train:
-        df_tr = pd.read_csv(args.train, index_col=0)
+        #summary(net, input_size=(batch_size_default, 3, 224, 224))
+        freemem()
+
+        #UNCOMMENT FOR TRAINING
+        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = 1)
+
+        #save model
+        model_save_load(model=net,path=path_to_model)
+
+        #save loss acc
+        visualize_loss_acc(net_ls,net_as,name=f'{args.model}_loss_acc_plot')
+
+    #Visualize/test model
     else:
-        print("Train data file missing")
-        return
-    if args.test:
-        df_tt = pd.read_csv(args.test, index_col=0)
-    else:
-        print("Test data file missing")
-        return
-    features = [f for f in df_tr.keys() if f not in ["lat", "lon", "time", "LABELS"]]
-    x_tr = df_tr[features].values
-    x_tt = df_tt[features].values
-    y_tr = df_tr.LABELS.values
-    y_tt = df_tt.LABELS.values
-    print(f"Number of features: {len(features)}")
-    print(f"Number of classes: {np.unique(y_tr).shape[0]}")
-    print(f"Train size: {x_tr.shape[0]}")
-    print(f"Test size: {x_tt.shape[0]}")
 
-    # Normalize
-    mean_tr = np.mean(x_tr, axis=0)
-    mean_tr = mean_tr[np.newaxis, :]
-    std_tr = np.std(x_tr, axis=0)
-    std_tr = std_tr[np.newaxis, :]
-    x_tr = x_tr - np.tile(mean_tr, (x_tr.shape[0], 1)) / np.tile(
-        std_tr, (x_tr.shape[0], 1)
-    )
-    x_tt = x_tt - np.tile(mean_tr, (x_tt.shape[0], 1)) / np.tile(
-        std_tr, (x_tt.shape[0], 1)
-    )
+        # shape bias calculation
+        shape_bias_dict, shape_bias_df, shape_bias_df_match = shape_bias(net,dataloaders)
+        print(shape_bias_dict)
+        # confusion matrix plot for shape biases
+        confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_shape'],name =f'{args.model}_shape_bias_all_cm')
+        #confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_shape'],name =f'{args.model}_shape_bias_corr_cm')
+        #confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_shape'],name =f'{args.model}_texture_bias_corr_cm')
+        print('classification report shape bias')
+        print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
+        #classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred'])
 
-    # Train models
-    baseline = DummyClassifier(strategy="most_frequent").fit(x_tr, y_tr)
-    logreg = LogisticRegression(random_state=0, max_iter=500).fit(x_tr, y_tr)
+        # visualize sample predictions
+        visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
 
-    # Evaluation
-    baseline_acc_tr = baseline.score(x_tr, y_tr)
-    baseline_acc_tt = baseline.score(x_tt, y_tt)
-    logreg_acc_tt = logreg.score(x_tt, y_tt)
-    logreg_acc_tr = logreg.score(x_tr, y_tr)
-    logreg_pred_tt = logreg.predict(x_tt)
-    logreg_acc_tt_aux = np.mean(logreg_pred_tt == y_tt)
-    assert np.isclose(logreg_acc_tt, logreg_acc_tt_aux)
-    print("Baseline - Train accuracy: {:.4f}".format(baseline_acc_tr))
-    print("Baseline - Test accuracy: {:.4f}".format(baseline_acc_tt))
-    print("LogReg - Train accuracy: {:.4f}".format(logreg_acc_tr))
-    print("LogReg - Test accuracy: {:.4f}".format(logreg_acc_tt))
+
+
+    print('done!')
+
 
 
 if __name__ == "__main__":
+    #arguments
     parser = ArgumentParser()
     parser = add_args(parser)
     args = parser.parse_args()
+
+    #where the magic happens
     main(args)
