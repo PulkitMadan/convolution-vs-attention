@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=convatt                                  # Job name
-#SBATCH --time=24:00:00                                     # time limit
+#SBATCH --time=1-23:00:00                                     # time limit
 #SBATCH --cpus-per-task=4                                   # Ask for 4 CPUs
 #SBATCH --mem=16Gb                                           # Ask for 16 GB of RAM
 #SBATCH --gres=gpu                                          # Ask for GPU

@@ -9,10 +9,10 @@ import torch
 import torch.nn as nn
 import os
 import torch.backends.cudnn as cudnn
-from torchvision import models, utils #double naming Warning
+from torchvision import models #double naming Warning
 from torchinfo import summary
 
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import classification_report
 
 #import local classes/functions
 from models.coatnet import coatnet_0
@@ -100,8 +100,13 @@ def main(args):
     print(f'Training on {args.model}')
     # Load model from save to scratch, if granted and exist
     model_name = args.model
-    home_path = os.path.expanduser('~')
-    path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+   
+    if os.name == 'nt': #windows
+        path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
+    else: #linux
+        home_path = os.path.expanduser('~')
+        path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+ 
     print(path_to_model)
 
     if os.path.exists(path_to_model) and args.load:

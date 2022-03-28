@@ -6,6 +6,7 @@
 *.json
 data/hymenoptera_data/
 data/processed/stylized_tiny_imagenet
+data/processed/Stylized_ImageNet_subset
 
 # Test Model
 models/trained_models/model.pth

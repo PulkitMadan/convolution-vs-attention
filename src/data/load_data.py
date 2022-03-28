@@ -10,8 +10,18 @@ import re
 
 #path to the extracted data
 #data directory
-home_path = os.path.expanduser('~')
-data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset'
+
+if os.name == 'nt': #windows
+    data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset')
+else: #linux
+    home_path = os.path.expanduser('~')
+    data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset'
+
+
+
+
+
+
 
 from data.Human16ToTinyImage import ClassConverter
 classconv = ClassConverter()
@@ -49,6 +59,7 @@ data_transforms = {
 }
 
 #custom dataset
+#linux format
 class MyDataset(Dataset):
     def __init__(self, image_paths, transform=None):
         self.image_paths = image_paths
@@ -90,15 +101,66 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.image_paths)
 
+#windows local format
+class MyDataset2(Dataset):
+    def __init__(self, image_paths, transform=None):
+        self.image_paths = image_paths
+        self.transform = transform
+        
+    def get_class_label(self, image_name):
+        # your method here
+        image_name_split = re.split(r"-|_|\\", image_name)
+        #print(image_name_split)
+        y = list()
+        #original class then texture class
+        y.append(mapping_207[image_name_split[1]])
+        y.append(mapping_207[image_name_split[4]])
+        return y
+    def get_class_label_train(self, image_name):
+        # your method here
+        image_name_split = re.split(r"-|_|\\", image_name)
+        #print(image_name_split)
+        y = list()
+        #original class then texture class
+        y.append(mapping_207[image_name_split[2]])
+        y.append(mapping_207[image_name_split[5]])
+        return y
+        
+    def __getitem__(self, index):
+        image_path = self.image_paths[index]
+        #print(image_path)
+        #print(image_path.split('/')[-1])
+        x = Image.open(image_path)
+        if 'train' in image_path:
+            y = self.get_class_label_train(image_path.split('/')[-1])
+        else:
+            y = self.get_class_label(image_path.split('/')[-1])
+        if self.transform is not None:
+            x = self.transform(x)
+        return x, y
+    
+    def __len__(self):
+        return len(self.image_paths)
+
+
 
 def dataload(batch_size,data_transforms=data_transforms):
+    if os.name == 'nt': #windows
+        print('in windows')
+        image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+                          for x in ['test', 'val']}
 
-    image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
-                      for x in ['test', 'val']}
+        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+    else: #linux
+        print('in linux')
+        image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+                          for x in ['test', 'val']}
 
-    image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
-    #print(image_datasets['val'][0][1])
-    #print(image_datasets['train'][0][1])
+        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+
+
+    # print(image_datasets['val'][0][1])
+    # print(image_datasets['train'][0][1])
     # image_datasets_train = datasets.ImageFolder(os.path.join(data_dir, 'train'),
     #                                           data_transforms['train'])
     
@@ -117,12 +179,11 @@ def dataload(batch_size,data_transforms=data_transforms):
     return image_datasets,dataloaders,dataset_sizes
 
 
-
 def map207_to_16(num):
     return class_16_listed.index(classconv.imgnet_id_to_human16[num])
+
 def map207_to_16names(num):
     return classconv.imgnet_id_to_human16[num]
-
 
 def print_datamap():
     # print(classconv.human16_to_imgnet_id['knife'])
