@@ -119,12 +119,12 @@ def main(args):
         freemem()
 
         #UNCOMMENT FOR TRAINING
-        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = 1)
+        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = 60)
 
         #save model
         model_save_load(model=net,path=path_to_model)
 
-        #save loss acc
+        #save loss acc plot
         visualize_loss_acc(net_ls,net_as,name=f'{args.model}_loss_acc_plot')
 
     #Visualize/test model
@@ -143,7 +143,6 @@ def main(args):
 
         # visualize sample predictions
         visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
-
 
 
     print('done!')

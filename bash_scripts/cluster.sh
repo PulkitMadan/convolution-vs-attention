@@ -9,8 +9,9 @@
 
 # Arguments
 # $1: Path to code directory
-# Copy code dir to snapshot code dir (rsync outside of script/remember to ex)
-rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git 
+# Copy code dir to snapshot code dir (rsync outside of compute node/remember to execute if updated code)
+# rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git 
+
 # Copy snapshot code dir to the compute node and cd there
 rsync -av --relative "$1" $SLURM_TMPDIR --exclude ".git"
 # Copy data to SLURM dir (done once)
