@@ -48,5 +48,5 @@ python train.py --train --model resnet --pretrain --load
 # testing
 python train.py --model resnet --pretrain --load
 
-#Example with $1
+#Example with $1 -> set 'scratch/code-snapshots/convolution-vs-attention/'
 #sbatch convolution-vs-attention/bash_scripts/cluster.sh scratch/code-snapshots/convolution-vs-attention/
