@@ -37,6 +37,7 @@ rng = seed_all(123)
 #defaults
 batch_size_default = 32 #geirhos used 256 (could use if memory available)
 class_size = 207
+epoch = 80
 
 #args
 def add_args(parser):
@@ -119,7 +120,7 @@ def main(args):
         freemem()
 
         #UNCOMMENT FOR TRAINING
-        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = 60)
+        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = epoch)
 
         #save model
         model_save_load(model=net,path=path_to_model)
@@ -140,6 +141,7 @@ def main(args):
         confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_texture'],name =f'{args.model}_texture_bias_corr_cm')
         print('classification report shape bias')
         print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
+        print('classification report texture bias')
         print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred']))
 
         # visualize sample predictions
