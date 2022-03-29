@@ -1,3 +1,4 @@
+from unittest import result
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -175,11 +176,25 @@ def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
 
     # remove those rows where shape = texture, i.e. no cue conflict present
     shape_bias_df_nc = shape_bias_df.loc[shape_bias_df.correct_shape != shape_bias_df.correct_texture]
-    fraction_correct_shape = len(shape_bias_df_nc.loc[shape_bias_df_nc.correct_shape==True]) / len(shape_bias_df)
-    fraction_correct_texture = len(shape_bias_df_nc.loc[shape_bias_df_nc.correct_texture==True]) / len(shape_bias_df)
-    
-    #print(fraction_correct_shape)
-    #print(fraction_correct_texture)
+    #print(shape_bias_df_nc)
+    #print(shape_bias_df_nc.pred.unique())
+
+    #shape bias for subclasses
+    subclass_result = list()
+    for classes in shape_bias_df_nc.pred.unique():
+        subclass_df = shape_bias_df_nc[shape_bias_df_nc.pred == classes]
+        #print(subclass_df)
+        fraction_correct_shape = len(subclass_df.loc[subclass_df.correct_shape==True]) / len(subclass_df)
+        fraction_correct_texture = len(subclass_df.loc[subclass_df.correct_texture==True]) / len(subclass_df)
+        subclass_result.append(fraction_correct_shape / (fraction_correct_shape + fraction_correct_texture))
+        #print(subclass_result)
+
+    subclass_shape_bias_result = dict(zip(shape_bias_df_nc.pred.unique(), subclass_result))
+    #print(subclass_shape_bias_result)
+
+    #shape bias for all
+    fraction_correct_shape = len(shape_bias_df_nc.loc[shape_bias_df_nc.correct_shape==True]) / len(shape_bias_df_nc)
+    fraction_correct_texture = len(shape_bias_df_nc.loc[shape_bias_df_nc.correct_texture==True]) / len(shape_bias_df_nc)
     shape_bias_result = fraction_correct_shape / (fraction_correct_shape + fraction_correct_texture)
     #print(shape_bias_result)
     result_dict = { "percent-correct-both": percent_correct_both,
@@ -189,6 +204,7 @@ def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
                     "top-k-acc-texture":topk_acc_texture,
                 "fraction-correct-shape": fraction_correct_shape,
                "fraction-correct-texture": fraction_correct_texture,
+               "subclass-shape-bias": subclass_shape_bias_result,
                "shape-bias": shape_bias_result}
 
 
