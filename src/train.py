@@ -140,7 +140,7 @@ def main(args):
         confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_texture'],name =f'{args.model}_texture_bias_corr_cm')
         print('classification report shape bias')
         print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
-        print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred'])
+        print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred']))
 
         # visualize sample predictions
         visualize_model(net,dataloaders, name=f'{args.model}_model_pred')

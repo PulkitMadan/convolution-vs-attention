@@ -150,7 +150,23 @@ You can create a new environment/requirements file using the commands below:
     conda env export > environment.yml
     conda list -e > requirements.txt
     pip list --format=freeze > requirements.txt
-    
+
+Run training, select --model (resnet,vit,convnext,coatnet):
+
+    python train.py --train --model resnet --pretrain --load
+
+Run testing/visualization:
+
+    python train.py --model resnet --pretrain --load
+
+
+## Run on Cluster
+In home directory, run the following:
+
+    git clone https://github.com/PulkitMadan/convolution-vs-attention.git
+    rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git
+    sbatch convolution-vs-attention/bash_scripts/cluster.sh scratch/code-snapshots/convolution-vs-attention/
+
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file
