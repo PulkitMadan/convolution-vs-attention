@@ -14,8 +14,10 @@ from torchinfo import summary
 
 from sklearn.metrics import classification_report
 
+from pytorch_pretrained_vit import ViT
 #import local classes/functions
 from models.coatnet import coatnet_0
+from models.convnext import convnext_small
 from utils.utils import seed_all, freemem
 from data.load_data import print_datamap, dataload
 from models.default_train import model_default_train, model_save_load
@@ -31,7 +33,7 @@ print(f'device: {device}')
 print(torch.cuda.device_count())
 print(torch.cuda.get_device_name(0))
 
-#seed for reproducibility
+#seed for reproducibility (when using import random)
 rng = seed_all(123)
 
 #defaults
@@ -86,19 +88,30 @@ def main(args):
         net = models.resnet50(pretrained=args.pretrain)
         # Set the size of each output sample to class_size
         net.fc = nn.Linear(net.fc.in_features, class_size)
-    #no model for vit or convnext on torchvision yet
-    elif args.model =='vit':
+    #using torch vision (v. 0.12.0+)
+    elif args.model =='vit_tv':
         net = models.vit_b_32(pretrained=args.pretrain)
         net.heads.head = nn.Linear(in_features=net.heads.head.in_features, out_features=class_size, bias=True)
-    elif args.model =='convnext':
+    elif args.model =='convnext_tv':
         net = models.convnext_small(pretrained=args.pretrain)
         net.classifier[2] = nn.Linear(in_features=net.classifier[2].in_features, out_features=class_size, bias=True)
+    #using local
+    elif args.model =='vit':
+        net = ViT('B_32', pretrained=args.pretrain)
+        net.fc = nn.Linear(in_features=net.fc.in_features, out_features=class_size, bias=True)
+    elif args.model =='convnext':
+        net = convnext_small(pretrained=args.pretrain,in_22k=True)
+        net.head = nn.Linear(in_features=net.head.in_features, out_features=class_size, bias=True)
+        #reduced batch size else cude memory error
+        _,dataloaders,dataset_sizes= dataload(batch_size=16)
     elif args.model =='coatnet':
         #no pretrained models yet
         net = coatnet_0()
         net.fc = nn.Linear(in_features=net.fc.in_features, out_features=class_size, bias=True)
     
     print(f'Training on {args.model}')
+    print(net)
+
     # Load model from save to scratch, if granted and exist
     model_name = args.model
    

@@ -42,6 +42,9 @@ echo "sbatch file name: $0"
 echo $(python -V)
 echo $(pip3 show torch)
 
+#fix for convnext model
+cp ~/scratch/code-snapshots/convolution-vs-attention/src/utils/helpers.py $SLURM_TMPDIR/venv/lib/python3.9/site-packages/timm/models/layers/helpers.py
+
 # Run Script
 # training
 python train.py --train --model resnet --pretrain --load

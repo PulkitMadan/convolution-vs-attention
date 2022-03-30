@@ -111,3 +111,6 @@ wheel
 widgetsnbextension
 win-inet-pton
 zipp
+pytorch-pretrained-vit
+timm==0.3.2
+tensorboardX
