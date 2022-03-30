@@ -20,7 +20,7 @@ from models.coatnet import coatnet_0
 from models.convnext import convnext_small
 from utils.utils import seed_all, freemem
 from data.load_data import print_datamap, dataload
-from models.default_train import model_default_train, model_save_load
+from models.default_train import model_default_train, model_save_load,load_model
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model
 
 cudnn.benchmark = True
@@ -108,7 +108,11 @@ def main(args):
         #no pretrained models yet
         net = coatnet_0()
         net.fc = nn.Linear(in_features=net.fc.in_features, out_features=class_size, bias=True)
-    
+    else:
+        #load original resnet models here
+        net = load_model(args.model)
+        net.module.fc = nn.Linear(in_features=net.module.fc.in_features, out_features=class_size, bias=True)
+ 
     print(f'Training on {args.model}')
     print(net)
 

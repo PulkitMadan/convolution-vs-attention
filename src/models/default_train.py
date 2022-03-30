@@ -5,8 +5,10 @@ import copy
 import time
 from tqdm import tqdm
 
+import torchvision
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils import model_zoo
 from torch.optim import lr_scheduler
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
