@@ -15,7 +15,15 @@ if os.name == 'nt': #windows
     data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset')
 else: #linux
     home_path = os.path.expanduser('~')
-    data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset'
+    data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
+
+
+if os.name == 'nt': #windows
+    data_dir_train = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset_OOD')
+else: #linux
+    home_path = os.path.expanduser('~')
+    data_dir_train = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
+
 
 
 
@@ -82,7 +90,8 @@ class MyDataset(Dataset):
         y = list()
         #original class then texture class
         y.append(mapping_207[image_name_split[0]])
-        y.append(mapping_207[image_name_split[3]])
+        #for commented out for OOD train
+        #y.append(mapping_207[image_name_split[3]])
         return y
         
     def __getitem__(self, index):
@@ -123,7 +132,7 @@ class MyDataset2(Dataset):
         y = list()
         #original class then texture class
         y.append(mapping_207[image_name_split[2]])
-        y.append(mapping_207[image_name_split[5]])
+        #y.append(mapping_207[image_name_split[5]])
         return y
         
     def __getitem__(self, index):
@@ -150,13 +159,13 @@ def dataload(batch_size,data_transforms=data_transforms):
         image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir_train}/train/*/*"), data_transforms['train'])
     else: #linux
         print('in linux')
         image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir_train}/train/*/*"), data_transforms['train'])
 
 
     # print(image_datasets['val'][0][1])

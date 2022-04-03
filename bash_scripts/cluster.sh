@@ -9,13 +9,16 @@
 
 # Arguments
 # $1: Path to code directory
+# Git clone repo
+git clone https://github.com/PulkitMadan/convolution-vs-attention.git
+
 # Copy code dir to snapshot code dir (rsync outside of compute node/remember to execute if updated code)
-# rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git 
+rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git 
 
 # Copy snapshot code dir to the compute node and cd there
 rsync -av --relative "$1" $SLURM_TMPDIR --exclude ".git"
 # Copy data to SLURM dir (done once)
-# rsync --bwlimit=10mb -av stylized_tiny_imagenet ~/projects/def-sponsor00/datasets/ --exclude .git
+# rsync --bwlimit=10mb -av stylized_imageNet_subset_OOD ~/projects/def-sponsor00/datasets/ --exclude .git
 cd $SLURM_TMPDIR/"$1/src"
 
 # Setup environment
@@ -47,7 +50,7 @@ cp ~/scratch/code-snapshots/convolution-vs-attention/src/utils/helpers.py $SLURM
 
 # Run Script
 # training
-python train.py --train --model resnet --pretrain --load
+python train.py --train --model resnet --pretrain #--load
 # testing
 python train.py --model resnet --pretrain --load
 
