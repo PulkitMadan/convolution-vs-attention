@@ -22,7 +22,9 @@ from utils.utils import seed_all, freemem
 from data.load_data import print_datamap, dataload
 from models.default_train import model_default_train, model_save_load,load_model
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model
-
+# added wandb import
+import wandb
+from data.load_data import class_16_listed, map207_to_16names, map207_to_16, mapping_207_reverse
 cudnn.benchmark = True
 
 #plt.ion()   # interactive mode
@@ -70,6 +72,8 @@ def add_args(parser):
         action='store_true',
         help="Load saved model parameters",
     )
+    parser.add_argument("name", type=str, help="Name of the run")
+    parser.add_argument("group", type=str, help="Name of the group")
     return parser
 
 #main function
@@ -77,6 +81,8 @@ def main(args):
 
     #print tests
     #print_datamap()
+    wandb.init(project="CNNs vs Transformers", name= args.name, group=args.group)
+
     print(args)
     print()
 
@@ -118,6 +124,8 @@ def main(args):
 
     # Load model from save to scratch, if granted and exist
     model_name = args.model
+    
+    wandb.watch(model_name)
    
     if os.name == 'nt': #windows
         path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
@@ -138,12 +146,16 @@ def main(args):
 
         #UNCOMMENT FOR TRAINING
         net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = epoch)
-
+        
         #save model
         model_save_load(model=net,path=path_to_model)
 
         #save loss acc plot
         visualize_loss_acc(net_ls,net_as,name=f'{args.model}_loss_acc_plot')
+        
+        wandb.log({"epoch": epoch,"loss_stats": net_ls,"accuracy_stats": net_as})
+        
+        
 
     #Visualize/test model
     else:
@@ -160,11 +172,21 @@ def main(args):
         print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
         print('classification report texture bias')
         print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred']))
+        
+        wandb.log({"conf_mat_shape" : wandb.plot.confusion_matrix(probs=None,
+                        y_true=shape_bias_df['lab_shape'], preds=shape_bias_df['pred'],
+                        class_names=class_16_listed)})
+        
+        wandb.log({"conf_mat_texture" : wandb.plot.confusion_matrix(probs=None,
+                        y_true=shape_bias_df['lab_texture'], preds=shape_bias_df['pred'],
+                        class_names=class_16_listed)})
+        
+        
 
         # visualize sample predictions
         visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
 
-
+    wandb.run.finish()
     print('done!')
 
 
@@ -177,3 +199,4 @@ if __name__ == "__main__":
 
     #where the magic happens
     main(args)
+
