@@ -12,7 +12,7 @@ import re
 #data directory
 
 if os.name == 'nt': #windows
-    data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset')
+    data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset_OOD')
 else: #linux
     home_path = os.path.expanduser('~')
     data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
@@ -83,6 +83,15 @@ class MyDataset(Dataset):
         y.append(mapping_207[image_name_split[0]]) #switch to 1 and 4 for tinyimagenet
         y.append(mapping_207[image_name_split[3]])
         return y
+    def get_class_label_val(self, image_name):
+        # your method here
+        image_name_split = re.split(r"-|_", image_name)
+        #print(image_name_split)
+        y = list()
+        #original class then texture class
+        y.append(mapping_207[image_name_split[0]]) #switch to 1 and 4 for tinyimagenet
+        #y.append(mapping_207[image_name_split[3]])
+        return y
     def get_class_label_train(self, image_name):
         # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
@@ -101,6 +110,8 @@ class MyDataset(Dataset):
         x = Image.open(image_path)
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
+        elif 'val' in image_path:
+            y = self.get_class_label_val(image_path.split('/')[-1])
         else:
             y = self.get_class_label(image_path.split('/')[-1])
         if self.transform is not None:
@@ -125,6 +136,17 @@ class MyDataset2(Dataset):
         y.append(mapping_207[image_name_split[1]])
         y.append(mapping_207[image_name_split[4]])
         return y
+
+    def get_class_label_val(self, image_name):
+        # your method here
+        image_name_split = re.split(r"-|_|\\", image_name)
+        #print(image_name_split)
+        y = list()
+        #original class then texture class
+        y.append(mapping_207[image_name_split[1]])
+        #y.append(mapping_207[image_name_split[4]])
+        return y
+
     def get_class_label_train(self, image_name):
         # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
@@ -142,6 +164,8 @@ class MyDataset2(Dataset):
         x = Image.open(image_path)
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
+        elif 'val' in image_path:
+            y = self.get_class_label_val(image_path.split('/')[-1])
         else:
             y = self.get_class_label(image_path.split('/')[-1])
         if self.transform is not None:
