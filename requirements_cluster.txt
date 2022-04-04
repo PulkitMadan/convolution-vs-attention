@@ -114,4 +114,4 @@ zipp
 pytorch-pretrained-vit
 timm==0.3.2
 tensorboardX
-wandb==0.4.1
+wandb
