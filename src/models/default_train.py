@@ -11,6 +11,8 @@ import torch.optim as optim
 from torch.utils import model_zoo
 from torch.optim import lr_scheduler
 
+import wandb
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def model_save_load(model,save=True,path='./models/trained_models/model.pth'):
@@ -89,6 +91,9 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
+            
+            wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
+            
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
@@ -96,6 +101,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
                 accuracy_stats['val'].append(epoch_acc)
+                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss,"Valid epoch_acc": epoch_acc})
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
@@ -149,7 +155,7 @@ def model_default_train(model,dataloaders,dataset_sizes,device,epoch = 60):
     optimizer_ft = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
     # Decay LR by a factor of 0.1 every 20 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
-
+    wandb.log({"lr": optimizer_ft.param_groups[0]["lr"]})
     return train_model(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders,dataset_sizes,device,
                        num_epochs=epoch)
 
