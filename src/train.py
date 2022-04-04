@@ -22,6 +22,7 @@ from utils.utils import seed_all, freemem
 from data.load_data import print_datamap, dataload
 from models.default_train import model_default_train, model_save_load,load_model
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model
+import wandb
 
 cudnn.benchmark = True
 
@@ -41,6 +42,8 @@ batch_size_default = 256 #geirhos used 256 (could use if memory available)
 class_size = 207
 epoch = 80
 
+#initialize wandb project
+wandb.init(project="CNNs vs Transformers")
 #args
 def add_args(parser):
     """
@@ -123,6 +126,8 @@ def main(args):
     print(f'Training on {args.model}')
     print(net)
     
+    wandb.watch(net)
+    
     trainable_params = 0 
     target = 'fc'
     if args.pretrain: 
@@ -185,7 +190,7 @@ def main(args):
         # visualize sample predictions
         visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
 
-
+    wandb.run.finish()
     print('done!')
 
 
