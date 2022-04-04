@@ -132,6 +132,7 @@ def main(args):
             if not target in name: 
                 param.requires_grad = False 
             else: 
+                param.requires_grad = True 
                 trainable_params += param.flatten().size()[0]
                 
     print(f'{trainable_params=}')
