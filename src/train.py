@@ -37,7 +37,7 @@ print(torch.cuda.get_device_name(0))
 rng = seed_all(123)
 
 #defaults
-batch_size_default = 32 #geirhos used 256 (could use if memory available)
+batch_size_default = 256 #geirhos used 256 (could use if memory available)
 class_size = 207
 epoch = 80
 
@@ -124,9 +124,12 @@ def main(args):
     print(net)
     
     trainable_params = 0 
+    target = 'fc'
     if args.pretrain: 
         for name, param in net.named_parameters(): 
-            if not 'fc' in name: 
+            if 'convnext' in args.model: 
+                target = 'classifier'
+            if not target in name: 
                 param.requires_grad = False 
             else: 
                 trainable_params += param.flatten().size()[0]
