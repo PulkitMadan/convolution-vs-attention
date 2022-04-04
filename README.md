@@ -175,6 +175,14 @@ To run this project, you will need to add the following environment variables to
 
 `ANOTHER_API_KEY`
 
+## WandB Run Locally
+Install wandb library and login:
+    ```pip install wandb
+       wandb login```
+You have to put your API key. You can get it from here https://wandb.ai/authorize
+
+Then you can run your respective Python command.
+
 
 ## Documentation
 
