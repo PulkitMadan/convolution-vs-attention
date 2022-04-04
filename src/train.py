@@ -107,7 +107,7 @@ def main(args):
         net = ViT('B_32', pretrained=args.pretrain)
         net.fc = nn.Linear(in_features=net.fc.in_features, out_features=class_size, bias=True)
     elif args.model =='convnext':
-        net = convnext_small(pretrained=args.pretrain,in_22k=True)
+        net = convnext_small(pretrained=args.pretrain,in_22k=False)
         net.head = nn.Linear(in_features=net.head.in_features, out_features=class_size, bias=True)
         #reduced batch size else cude memory error
         _,dataloaders,dataset_sizes= dataload(batch_size=16)
@@ -126,10 +126,10 @@ def main(args):
     trainable_params = 0 
     target = 'fc'
     if args.pretrain: 
+        if 'convnext' in args.model: 
+            target = 'head'
         for name, param in net.named_parameters(): 
-            if 'convnext' in args.model: 
-                target = 'classifier'
-            if not target in name: 
+            if target not in name: 
                 param.requires_grad = False 
             else: 
                 param.requires_grad = True 
