@@ -44,6 +44,7 @@ class_size = 207
 epoch = 80
 
 #args
+wandb.init(project="CNNs vs Transformers")
 def add_args(parser):
     """
     Add arguments to parser
@@ -72,8 +73,6 @@ def add_args(parser):
         action='store_true',
         help="Load saved model parameters",
     )
-    parser.add_argument("name", type=str, help="Name of the run")
-    parser.add_argument("group", type=str, help="Name of the group")
     return parser
 
 #main function
@@ -81,7 +80,6 @@ def main(args):
 
     #print tests
     #print_datamap()
-    wandb.init(project="CNNs vs Transformers", name= args.name, group=args.group)
 
     print(args)
     print()
@@ -125,7 +123,7 @@ def main(args):
     # Load model from save to scratch, if granted and exist
     model_name = args.model
     
-    wandb.watch(model_name)
+    #wandb.watch(model_name)
    
     if os.name == 'nt': #windows
         path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
