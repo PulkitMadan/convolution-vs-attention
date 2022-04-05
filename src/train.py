@@ -42,8 +42,6 @@ batch_size_default = 256 #geirhos used 256 (could use if memory available)
 class_size = 207
 epoch = 80
 
-#initialize wandb project
-wandb.init(project="CNNs vs Transformers")
 #args
 def add_args(parser):
     """
@@ -72,6 +70,13 @@ def add_args(parser):
         default=False, #should be set to true when testing
         action='store_true',
         help="Load saved model parameters",
+    )
+
+    parser.add_argument(
+        "--frozen",
+        default=False, 
+        action='store_true',
+        help="Freeze model parameters except for last layer",
     )
     return parser
 
@@ -123,14 +128,13 @@ def main(args):
         net = load_model(args.model)
         net.module.fc = nn.Linear(in_features=net.module.fc.in_features, out_features=class_size, bias=True)
     
-    print(f'Training on {args.model}')
-    print(net)
     
     wandb.watch(net)
     
     trainable_params = 0 
     target = 'fc'
-    if args.pretrain: 
+    if args.pretrain and args.frozen:
+        args.model = args.model + "_frozen"
         if 'convnext' in args.model: 
             target = 'head'
         for name, param in net.named_parameters(): 
@@ -139,8 +143,8 @@ def main(args):
             else: 
                 param.requires_grad = True 
                 trainable_params += param.flatten().size()[0]
-                
-    print(f'{trainable_params=}')
+
+
 
     # Load model from save to scratch, if granted and exist
     model_name = args.model
@@ -156,6 +160,11 @@ def main(args):
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
         net = model_save_load(save=False,model=net,path=path_to_model)
+
+
+    print(f'Training on {args.model}')
+    print(net)            
+    print(f'{trainable_params=}')
 
     # Training model
     if args.train:
@@ -196,6 +205,9 @@ def main(args):
 
 
 if __name__ == "__main__":
+    #initialize wandb project
+    wandb.init(project="CNNs vs Transformers")
+
     #arguments
     parser = ArgumentParser()
     parser = add_args(parser)
