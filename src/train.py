@@ -143,6 +143,7 @@ def main(args):
             else: 
                 param.requires_grad = True 
                 trainable_params += param.flatten().size()[0]
+        print(f'{trainable_params=}')
 
 
 
@@ -164,7 +165,7 @@ def main(args):
 
     print(f'Training on {args.model}')
     print(net)            
-    print(f'{trainable_params=}')
+    
 
     # Training model
     if args.train:
