@@ -14,7 +14,7 @@ from torchinfo import summary
 
 from sklearn.metrics import classification_report
 
-# from pytorch_pretrained_vit import ViT
+from pytorch_pretrained_vit import ViT
 #import local classes/functions
 from models.coatnet import coatnet_0
 from models.convnext import convnext_small
@@ -38,7 +38,7 @@ print(torch.cuda.get_device_name(0))
 rng = seed_all(123)
 
 #defaults
-batch_size_default = 256 #geirhos used 256 (could use if memory available)
+batch_size_default = 64 #geirhos used 256 (could use if memory available)
 
 epoch = 80
 
@@ -132,7 +132,7 @@ def main(args):
         net = convnext_small(pretrained=args.pretrain,in_22k=False)
         net.head = nn.Linear(in_features=net.head.in_features, out_features=class_size, bias=True)
         #reduced batch size else cude memory error
-        _,dataloaders,dataset_sizes= dataload(batch_size=16)
+        #_,dataloaders,dataset_sizes= dataload(batch_size=16)
     elif args.model =='coatnet':
         #no pretrained models yet
         net = coatnet_0()
@@ -177,11 +177,11 @@ def main(args):
         
         #Change fc layer for SIN trained model (Unfrozen)
         if args.mela:
-            net = models.resnet50(pretrained=args.pretrain)
-            # Set the size of each output sample to class_size
-            net.fc = nn.Linear(net.fc.in_features, 207)
+            # net = models.resnet50(pretrained=args.pretrain)
+            # # Set the size of each output sample to class_size
+            # net.fc = nn.Linear(net.fc.in_features, 207)
             net = model_save_load(save=False,model=net,path=path_to_model)
-            net.fc = nn.Linear(net.fc.in_features, class_size)
+            # net.fc = nn.Linear(net.fc.in_features, class_size)
 
         else:
             net = model_save_load(save=False,model=net,path=path_to_model)
