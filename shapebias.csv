@@ -1,0 +1,161 @@
+Models,classes,shape_bias
+resnet pretrained unfrozen non OOD,bird,0.98219
+resnet pretrained unfrozen non OOD,dog,0.96979
+resnet pretrained unfrozen non OOD,chair,1.00000
+resnet pretrained unfrozen non OOD,bear,1.00000
+resnet pretrained unfrozen non OOD,bottle,0.98842
+resnet pretrained unfrozen non OOD,cat,1.00000
+resnet pretrained unfrozen non OOD,truck,0.99394
+resnet pretrained unfrozen non OOD,boat,0.99552
+resnet pretrained unfrozen non OOD,clock,0.97414
+resnet pretrained unfrozen non OOD,elephant,1.00000
+resnet pretrained unfrozen non OOD,airplane,1.00000
+resnet pretrained unfrozen non OOD,car,1.00000
+resnet pretrained unfrozen non OOD,bicycle,1.00000
+resnet pretrained unfrozen non OOD,knife,1.00000
+resnet pretrained unfrozen non OOD,keyboard,1.00000
+resnet pretrained unfrozen non OOD,oven,1.00000
+resnet pretrained unfrozen OOD,bird,0.97600
+resnet pretrained unfrozen OOD,dog,0.96535
+resnet pretrained unfrozen OOD,chair,0.99333
+resnet pretrained unfrozen OOD,bear,0.97368
+resnet pretrained unfrozen OOD,bottle,0.99585
+resnet pretrained unfrozen OOD,cat,0.99156
+resnet pretrained unfrozen OOD,truck,0.99359
+resnet pretrained unfrozen OOD,boat,0.99070
+resnet pretrained unfrozen OOD,clock,0.98095
+resnet pretrained unfrozen OOD,elephant,1.00000
+resnet pretrained unfrozen OOD,airplane,1.00000
+resnet pretrained unfrozen OOD,car,0.99074
+resnet pretrained unfrozen OOD,bicycle,1.00000
+resnet pretrained unfrozen OOD,knife,1.00000
+resnet pretrained unfrozen OOD,keyboard,0.98810
+resnet pretrained unfrozen OOD,oven,1.00000
+resnet pretrained frozen OOD,bird,0.92316
+resnet pretrained frozen OOD,dog,0.90497
+resnet pretrained frozen OOD,chair,0.98319
+resnet pretrained frozen OOD,bear,0.98400
+resnet pretrained frozen OOD,bottle,0.97683
+resnet pretrained frozen OOD,cat,0.97309
+resnet pretrained frozen OOD,truck,0.98932
+resnet pretrained frozen OOD,boat,0.95313
+resnet pretrained frozen OOD,clock,0.97297
+resnet pretrained frozen OOD,elephant,1.00000
+resnet pretrained frozen OOD,airplane,1.00000
+resnet pretrained frozen OOD,car,1.00000
+resnet pretrained frozen OOD,bicycle,1.00000
+resnet pretrained frozen OOD,knife,1.00000
+resnet pretrained frozen OOD,keyboard,0.98780
+resnet pretrained frozen OOD,oven,1.00000
+resnet pretrained,bird,0.54846
+resnet pretrained,dog,0.52391
+resnet pretrained,chair,
+resnet pretrained,bear,
+resnet pretrained,bottle,0.00000
+resnet pretrained,cat,
+resnet pretrained,truck,1.00000
+resnet pretrained,boat,
+resnet pretrained,clock,0.48000
+resnet pretrained,elephant,
+resnet pretrained,airplane,
+resnet pretrained,car,
+resnet pretrained,bicycle,
+resnet pretrained,knife,
+resnet pretrained,keyboard,
+resnet pretrained,oven,
+convnext pretrained,bird,0.44053
+convnext pretrained,dog,0.50400
+convnext pretrained,chair,0.66667
+convnext pretrained,bear,0.42857
+convnext pretrained,bottle,0.47826
+convnext pretrained,cat,0.25000
+convnext pretrained,truck,0.57576
+convnext pretrained,boat,0.57143
+convnext pretrained,clock,0.66667
+convnext pretrained,elephant,1.00000
+convnext pretrained,airplane,1.00000
+convnext pretrained,car,0.60000
+convnext pretrained,bicycle,
+convnext pretrained,knife,
+convnext pretrained,keyboard,
+convnext pretrained,oven,
+convnext pretrained frozen OOD,bird,0.95167
+convnext pretrained frozen OOD,dog,0.95880
+convnext pretrained frozen OOD,chair,0.98742
+convnext pretrained frozen OOD,bear,1.00000
+convnext pretrained frozen OOD,bottle,0.97173
+convnext pretrained frozen OOD,cat,0.98099
+convnext pretrained frozen OOD,truck,0.99020
+convnext pretrained frozen OOD,boat,0.97585
+convnext pretrained frozen OOD,clock,1.00000
+convnext pretrained frozen OOD,elephant,0.98837
+convnext pretrained frozen OOD,airplane,1.00000
+convnext pretrained frozen OOD,car,1.00000
+convnext pretrained frozen OOD,bicycle,1.00000
+convnext pretrained frozen OOD,knife,1.00000
+convnext pretrained frozen OOD,keyboard,0.98864
+convnext pretrained frozen OOD,oven,1.00000
+vit-b16 pretrained,bird,0.55385
+vit-b16 pretrained,dog,0.53122
+vit-b16 pretrained,chair,0.54545
+vit-b16 pretrained,bear,0.16667
+vit-b16 pretrained,bottle,0.62500
+vit-b16 pretrained,cat,0.66667
+vit-b16 pretrained,truck,0.30769
+vit-b16 pretrained,boat,0.41667
+vit-b16 pretrained,clock,0.71429
+vit-b16 pretrained,elephant,
+vit-b16 pretrained,airplane,1.00000
+vit-b16 pretrained,car,0.00000
+vit-b16 pretrained,bicycle,1.00000
+vit-b16 pretrained,knife,
+vit-b16 pretrained,keyboard,0.00000
+vit-b16 pretrained,oven,
+vit-b16 pretrained frozen OOD,bird,0.98558
+vit-b16 pretrained frozen OOD,dog,0.97021
+vit-b16 pretrained frozen OOD,chair,1.00000
+vit-b16 pretrained frozen OOD,bear,1.00000
+vit-b16 pretrained frozen OOD,bottle,0.99298
+vit-b16 pretrained frozen OOD,cat,0.98828
+vit-b16 pretrained frozen OOD,truck,0.99381
+vit-b16 pretrained frozen OOD,boat,1.00000
+vit-b16 pretrained frozen OOD,clock,0.98450
+vit-b16 pretrained frozen OOD,elephant,1.00000
+vit-b16 pretrained frozen OOD,airplane,1.00000
+vit-b16 pretrained frozen OOD,car,1.00000
+vit-b16 pretrained frozen OOD,bicycle,1.00000
+vit-b16 pretrained frozen OOD,knife,1.00000
+vit-b16 pretrained frozen OOD,keyboard,1.00000
+vit-b16 pretrained frozen OOD,oven,1.00000
+vit-b32 pretrained,bird,0.45567
+vit-b32 pretrained,dog,0.49429
+vit-b32 pretrained,chair,0.69231
+vit-b32 pretrained,bear,0.69231
+vit-b32 pretrained,bottle,0.63636
+vit-b32 pretrained,cat,0.57143
+vit-b32 pretrained,truck,0.66667
+vit-b32 pretrained,boat,0.35714
+vit-b32 pretrained,clock,0.00000
+vit-b32 pretrained,elephant,0.00000
+vit-b32 pretrained,airplane,
+vit-b32 pretrained,car,0.00000
+vit-b32 pretrained,bicycle,0.00000
+vit-b32 pretrained,knife,0.50000
+vit-b32 pretrained,keyboard,
+vit-b32 pretrained,oven,
+vit-b32 pretrained frozen OOD,bird,0.97133
+vit-b32 pretrained frozen OOD,dog,0.94751
+vit-b32 pretrained frozen OOD,chair,1.00000
+vit-b32 pretrained frozen OOD,bear,0.98675
+vit-b32 pretrained frozen OOD,bottle,0.98819
+vit-b32 pretrained frozen OOD,cat,0.97727
+vit-b32 pretrained frozen OOD,truck,0.98722
+vit-b32 pretrained frozen OOD,boat,0.98131
+vit-b32 pretrained frozen OOD,clock,0.97248
+vit-b32 pretrained frozen OOD,elephant,1.00000
+vit-b32 pretrained frozen OOD,airplane,1.00000
+vit-b32 pretrained frozen OOD,car,1.00000
+vit-b32 pretrained frozen OOD,bicycle,1.00000
+vit-b32 pretrained frozen OOD,knife,1.00000
+vit-b32 pretrained frozen OOD,keyboard,1.00000
+vit-b32 pretrained frozen OOD,oven,1.00000
