@@ -175,14 +175,16 @@ def main(args):
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
         
-        #TODO switch for SIN
-        net = models.resnet50(pretrained=args.pretrain)
-        # Set the size of each output sample to class_size
-        net.fc = nn.Linear(net.fc.in_features, 207)
-        net = model_save_load(save=False,model=net,path=path_to_model)
+        #Change fc layer for SIN trained model (Unfrozen)
+        if args.mela:
+            net = models.resnet50(pretrained=args.pretrain)
+            # Set the size of each output sample to class_size
+            net.fc = nn.Linear(net.fc.in_features, 207)
+            net = model_save_load(save=False,model=net,path=path_to_model)
+            net.fc = nn.Linear(net.fc.in_features, class_size)
 
-        net = nn.Sequential(net,nn.Linear(net.fc.out_features, class_size))
-
+        else:
+            net = model_save_load(save=False,model=net,path=path_to_model)
 
     print(f'Training on {args.model}')
     print(net)            
