@@ -15,6 +15,8 @@ else: #linux
     home_path = os.path.expanduser('~')
     fig_path = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/src/visualization'
 
+from sklearn.metrics import classification_report
+
 def visualize_loss_acc(loss_stats, accuracy_stats,name='loss_acc_plot'):
     # Create dataframes
     train_val_acc_df = pd.DataFrame.from_dict(accuracy_stats).reset_index().melt(id_vars=['index']).rename(columns={"index":"epochs"})
@@ -82,6 +84,34 @@ def accuracy_topk(output: torch.Tensor, target: torch.Tensor, topk=(1,)) -> list
             topk_acc = tot_correct_topk / batch_size  # topk accuracy for entire batch
             list_topk_accs.append(topk_acc)
         return list_topk_accs  # list of topk accuracies for entire batch [topk1, topk2, ... etc]
+def eval_test(model, dataloaders,dataset_sizes):
+    model.to(device=device)
+    y_pred_list = []
+    y_true_list = []
+    running_corrects = 0
+    with torch.no_grad():
+        model.eval()
+        for i, (inputs, labels) in enumerate(dataloaders['test']):
+            # batch_size = len(labels)
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            y_pred_list = np.concatenate((y_pred_list, preds.cpu().numpy()), axis=None)
+            y_true_list = np.concatenate((y_true_list, labels.cpu().numpy()), axis=None)
+            #print(y_pred_list)
+            #print(y_true_list)
+            running_corrects += torch.sum(preds == labels.data)
+
+        # y_pred_list = [i[0][0][0] for i in y_pred_list]
+        # y_true_list = [i[0] for i in y_true_list]
+        print(classification_report(y_true_list, y_pred_list))
+        acc = running_corrects.double().item() / dataset_sizes['test']
+
+    return acc
+
 
 def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
     model.to(device=device)

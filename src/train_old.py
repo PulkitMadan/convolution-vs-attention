@@ -20,7 +20,7 @@ from models.coatnet import coatnet_0
 from models.convnext import convnext_small
 from utils.utils import seed_all, freemem
 from data.load_data import print_datamap, dataload, dataload_Mela
-from models.default_train import model_default_train, model_save_load,load_model, model_default_train_m
+from models.default_train import model_default_train, model_save_load,load_model
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model, eval_test
 import wandb
 
@@ -39,7 +39,7 @@ rng = seed_all(123)
 
 #defaults
 batch_size_default = 256 #geirhos used 256 (could use if memory available)
-
+class_size = 207
 epoch = 80
 
 #args
@@ -78,13 +78,6 @@ def add_args(parser):
         action='store_true',
         help="Freeze model parameters except for last layer",
     )
-
-    parser.add_argument(
-        "--mela",
-        default=False, 
-        action='store_true',
-        help="use melanoma dataset",
-    )
     return parser
 
 #main function
@@ -96,14 +89,7 @@ def main(args):
     print()
 
     #load data
-    if args.mela:
-        print('loaded melanoma data')
-        class_size = 2
-        _,dataloaders,dataset_sizes= dataload_Mela(batch_size=batch_size_default)
-    else:
-        print('loaded SIN data')
-        class_size = 207
-        _,dataloaders,dataset_sizes= dataload(batch_size=batch_size_default)
+    _,dataloaders,dataset_sizes= dataload(batch_size=batch_size_default)
     
     # initialize model
     if args.model =='resnet':
@@ -145,7 +131,7 @@ def main(args):
     
     wandb.watch(net)
     
-    trainable_params = 0
+    trainable_params = 0 
     target = 'fc'
     if args.pretrain and args.frozen:
         args.model = args.model + "_frozen"
@@ -180,18 +166,15 @@ def main(args):
     print(f'Training on {args.model}')
     print(net)            
     
-    
+
     # Training model
     if args.train:
         #summary(net, input_size=(batch_size_default, 3, 224, 224))
         freemem()
 
         #UNCOMMENT FOR TRAINING
-        if args.mela:
-            net,net_ls,net_as = model_default_train_m(net,dataloaders,dataset_sizes,device,epoch = epoch)
-        else:
-            net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = epoch)
-        
+        net,net_ls,net_as = model_default_train(net,dataloaders,dataset_sizes,device,epoch = epoch)
+
         #save model
         model_save_load(model=net,path=path_to_model)
 
@@ -200,27 +183,31 @@ def main(args):
         
     #Visualize/test model
     else:
-
-        if args.mela:
-
-            print(eval_test(net,dataloaders,dataset_sizes))
-        
-        else:
-            # shape bias calculation
-            shape_bias_dict, shape_bias_df, shape_bias_df_match = shape_bias(net,dataloaders)
-            print(shape_bias_dict)
-            # confusion matrix plot for shape biases
-            confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_shape'],name =f'{args.model}_shape_bias_all_cm')
-            confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_texture'],name =f'{args.model}_texture_bias_all_cm')
-            confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_shape'],name =f'{args.model}_shape_bias_corr_cm')
-            confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_texture'],name =f'{args.model}_texture_bias_corr_cm')
-            print('classification report shape bias')
-            print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
-            print('classification report texture bias')
-            print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred']))
+        #load data 
+        net = models.resnet50(pretrained=args.pretrain)
+        # Set the size of each output sample to class_size
+        net.fc = nn.Linear(net.fc.in_features, 2)
+        _,dataloaders,dataset_sizes= dataload_Mela(batch_size=batch_size_default)
     
-            # visualize sample predictions
-            visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
+
+        print(eval_test(net,dataloaders,dataset_sizes))
+        
+
+        # # shape bias calculation
+        # shape_bias_dict, shape_bias_df, shape_bias_df_match = shape_bias(net,dataloaders)
+        # print(shape_bias_dict)
+        # # confusion matrix plot for shape biases
+        # confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_shape'],name =f'{args.model}_shape_bias_all_cm')
+        # confusion_matrix_hm(shape_bias_df['pred'],shape_bias_df['lab_texture'],name =f'{args.model}_texture_bias_all_cm')
+        # confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_shape'],name =f'{args.model}_shape_bias_corr_cm')
+        # confusion_matrix_hm(shape_bias_df_match['pred'],shape_bias_df_match['lab_texture'],name =f'{args.model}_texture_bias_corr_cm')
+        # print('classification report shape bias')
+        # print(classification_report(shape_bias_df['lab_shape'], shape_bias_df['pred']))
+        # print('classification report texture bias')
+        # print(classification_report(shape_bias_df['lab_texture'], shape_bias_df['pred']))
+
+        # # visualize sample predictions
+        # visualize_model(net,dataloaders, name=f'{args.model}_model_pred')
 
     wandb.run.finish()
     print('done!')

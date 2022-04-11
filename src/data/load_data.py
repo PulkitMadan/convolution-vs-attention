@@ -7,27 +7,24 @@ from utils.utils import seed_worker
 import os 
 from PIL import Image
 import re
+import pandas as pd
 
 #path to the extracted data
 #data directory
 
+#loading stylized_imagenet
 if os.name == 'nt': #windows
     data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset_OOD')
 else: #linux
     home_path = os.path.expanduser('~')
     data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
 
-
+#loading melanoma dataset
 if os.name == 'nt': #windows
-    data_dir_train = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset_OOD')
+    data_dir_m = os.path.abspath(f'../data/processed/Melanoma_dataset')
 else: #linux
     home_path = os.path.expanduser('~')
-    data_dir_train = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
-
-
-
-
-
+    data_dir_m = f'{home_path}/projects/def-sponsor00/datasets/Melanoma_dataset'
 
 
 
@@ -175,7 +172,58 @@ class MyDataset2(Dataset):
     def __len__(self):
         return len(self.image_paths)
 
+class MelanomaDataset(Dataset):
+    def __init__(self, csv_file, root_dir, transforms = None):
+        """
+        Class initialization
+        Args:
+            df (pd.DataFrame): DataFrame with data description
+            imfolder (str): folder with images
+            train (bool): flag of whether a training dataset is being initialized or testing one
+            transforms: image transformation method to be applied
+            meta_features (list): list of features with meta information, such as sex and age
+            
+        """
+        self.df = pd.read_csv(csv_file)
+        self.root_dir = root_dir
+        self.transforms = transforms
+        
+    def __getitem__(self, index):
+        im_path = os.path.join(self.root_dir, self.df.iloc[index]['image_id'] + '.jpg')
+        x = Image.open(im_path)
+    
+        y = self.df.iloc[index]['melanoma']
 
+        if self.transforms:
+            x = self.transforms(x)
+        
+        return x, y
+    
+    def __len__(self):
+        return len(self.df)
+    
+def dataload_Mela(batch_size,data_transforms=data_transforms):
+    image_datasets = {}
+    image_datasets['test'] = MelanomaDataset(csv_file=f'{data_dir_m}/ISIC-2017_Test_v2_Part3_GroundTruth.csv',
+                                root_dir=f'{data_dir_m}/test',transforms=data_transforms['test'])
+    image_datasets['val'] = MelanomaDataset(csv_file=f'{data_dir_m}/ISIC-2017_Validation_Part3_GroundTruth.csv',
+                                root_dir=f'{data_dir_m}/val',transforms=data_transforms['val'])
+    image_datasets['train'] = MelanomaDataset(csv_file=f'{data_dir_m}/ISIC-2017_Training_Part3_GroundTruth.csv',
+                                root_dir=f'{data_dir_m}/train',transforms=data_transforms['train'])
+
+    # print(image_datasets['test'][0])
+    # print(image_datasets['val'][0])
+    # print(image_datasets['train'][0])
+    
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
+                                                 shuffle=True, num_workers=4, worker_init_fn=seed_worker)
+                  for x in ['train','val']}
+    dataloaders['test'] = torch.utils.data.DataLoader(image_datasets['test'], batch_size=batch_size,
+                                                 shuffle=False, num_workers=4)
+
+    dataset_sizes = {x: len(image_datasets[x]) for x in ['test','train','val']}
+
+    return image_datasets,dataloaders,dataset_sizes
 
 def dataload(batch_size,data_transforms=data_transforms):
     if os.name == 'nt': #windows
@@ -183,13 +231,13 @@ def dataload(batch_size,data_transforms=data_transforms):
         image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir_train}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
     else: #linux
         print('in linux')
         image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir_train}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
 
     # print(image_datasets['val'][0][1])
@@ -222,13 +270,30 @@ def print_datamap():
     # print(classconv.human16_to_imgnet_id['knife'])
     # print(mapping_207)
     # print(len(mapping_207_reverse))
-    image_datasets,dataloaders,dataset_sizes= dataload(batch_size=64)
+    image_datasets,dataloaders,dataset_sizes= dataload_Mela(batch_size=64)
     print(dataset_sizes)
-    print(dataset_sizes['test'])
-    print(class_16_listed)
-    print(image_datasets)
+    # print(dataset_sizes['test'])
+    # print(class_16_listed)
+    # print(image_datasets)
+    print(len(dataloaders['test']))
+    print(len(dataloaders['train']))
+    print(image_datasets['train'][0][0])
     print(image_datasets['train'][0][1])
     print(image_datasets['val'][0][1])
+    print(image_datasets['test'][0][1])
+
+
+    # image_datasets,dataloaders,dataset_sizes= dataload(batch_size=64)
+    # print(dataset_sizes)
+    # # print(dataset_sizes['test'])
+    # # print(class_16_listed)
+    # # print(image_datasets)
+    # print(len(dataloaders['test']))
+    # print(len(dataloaders['train']))
+    # print(image_datasets['train'][0][0])
+    # print(image_datasets['train'][0][1])
+    # print(image_datasets['val'][0][1])
+    # print(image_datasets['test'][0][1])
 
     num = mapping_207_reverse[200]
     print(map207_to_16(num))
