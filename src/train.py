@@ -202,7 +202,7 @@ def main(args):
     else:
 
         if args.mela:
-
+            # acc and classification on test set
             print(eval_test(net,dataloaders,dataset_sizes))
         
         else:

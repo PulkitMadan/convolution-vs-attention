@@ -69,7 +69,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-                print(labels)
+                # print(labels)
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
