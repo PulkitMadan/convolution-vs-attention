@@ -28,3 +28,4 @@ dependencies:
   - huggingface_hub
   - torchinfo
   - transformers
+  - pytorch_pretrained_vit

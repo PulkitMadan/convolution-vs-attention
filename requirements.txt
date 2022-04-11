@@ -111,3 +111,4 @@ wheel
 widgetsnbextension
 win-inet-pton
 zipp
+pytorch_pretrained_vit

@@ -8,6 +8,9 @@ data/hymenoptera_data/
 data/processed/stylized_tiny_imagenet
 data/processed/Stylized_ImageNet_subset
 data/processed/Stylized_ImageNet_subset_OOD
+data/processed/Melanoma_dataset
+data/processed/*
+src/wandb
 
 # Test Model
 models/trained_models/model.pth

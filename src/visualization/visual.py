@@ -15,7 +15,7 @@ else: #linux
     home_path = os.path.expanduser('~')
     fig_path = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/src/visualization'
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 def visualize_loss_acc(loss_stats, accuracy_stats,name='loss_acc_plot'):
     # Create dataframes
@@ -108,10 +108,50 @@ def eval_test(model, dataloaders,dataset_sizes):
         # y_pred_list = [i[0][0][0] for i in y_pred_list]
         # y_true_list = [i[0] for i in y_true_list]
         print(classification_report(y_true_list, y_pred_list))
+        print(confusion_matrix(y_true_list,y_pred_list))
         acc = running_corrects.double().item() / dataset_sizes['test']
 
     return acc
 
+def topk_eval_test(model, dataloaders,topk=(1,5,10,20),class_map = mapping_207_reverse):
+    model.to(device=device)
+
+    maxk = max(topk)
+    
+    with torch.no_grad():
+        model.eval()
+
+        topk_acc_all = list()
+
+        for i, (inputs, labels) in enumerate(dataloaders['test']):
+            batch_size = len(labels)
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            #get top k prediction acc
+            _, preds_topk = outputs.topk(k=maxk, dim=1)
+
+            #top k calculation
+            preds_topk = preds_topk.t() 
+            target_reshaped = labels.view(1, -1).expand_as(preds_topk)
+            correct = (preds_topk == target_reshaped)
+
+            
+            list_topk_accs = []  # idx is topk1, topk2, ... etc
+            #loop through top k predictions
+            for k in topk:
+                # get tensor of which topk answer was right
+                correct_k  = correct[:k].float().sum(dim=0)
+                topk_acc = sum([1 for i in correct_k if i > 0]) / batch_size
+
+                list_topk_accs.append(topk_acc)
+
+            topk_acc_all.append(list_topk_accs)
+        topk_acc_all = np.asarray(topk_acc_all).sum(axis=0)/len(topk_acc_all)
+
+    return topk_acc_all
 
 def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
     model.to(device=device)
@@ -269,6 +309,7 @@ def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_
         select = 'val'
 
     with torch.no_grad():
+        lab_cor = 0
         for i, (inputs, labels) in enumerate(dataloaders[select]):
             if i == 0 : 
                 print(type(inputs))
@@ -280,9 +321,6 @@ def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_
             _, preds = torch.max(outputs, 1)
 
             for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images//2, 2, images_so_far)
-                ax.axis('off')
 
                 pred_nameid = class_map[preds[j]]
                 pred_name = map207_to_16names(pred_nameid)
@@ -293,17 +331,45 @@ def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_
                 tex_nameid = class_map[textures[j]]
                 tex_name = map207_to_16names(tex_nameid)
 
-                nl = '\n'
 
-                ax.set_title(f'Predicted: {pred_name}, ID: {pred_nameid} {nl} True: {lab_name}, ID: {lab_nameid} {nl} Texture: {tex_name}, ID: {tex_nameid}')
+                if (pred_name == lab_name) and (tex_name != lab_name) and (lab_cor ==0):
+                    lab_cor = 1
+                    images_so_far += 1
+                    ax = plt.subplot(num_images//2, 2, images_so_far)
+                    ax.axis('off')
+
+                
+
+                    nl = '\n'
+
+                    ax.set_title(f'Predicted: {pred_name}, ID: {pred_nameid} {nl} True: {lab_name}, ID: {lab_nameid} {nl} Texture: {tex_name}, ID: {tex_nameid}')
 
 
-                imshow(inputs.cpu().data[j])
+                    imshow(inputs.cpu().data[j])
 
-                plt.suptitle('Sample predictions')
+                    #plt.suptitle('Sample predictions')
 
-                plt.gcf().set_size_inches(12, 7)
+                    plt.gcf().set_size_inches(12, 7)
+                
+                if (pred_name == tex_name) and (tex_name != lab_name):
+                    images_so_far += 1
+                    ax = plt.subplot(num_images//2, 2, images_so_far)
+                    ax.axis('off')
 
+                
+
+                    nl = '\n'
+
+                    ax.set_title(f'Predicted: {pred_name}, ID: {pred_nameid} {nl} True: {lab_name}, ID: {lab_nameid} {nl} Texture: {tex_name}, ID: {tex_nameid}')
+
+
+                    imshow(inputs.cpu().data[j])
+
+                    #plt.suptitle('Sample predictions')
+
+                    plt.gcf().set_size_inches(12, 7)
+
+                plt.tight_layout()
                 plt.savefig(f'{fig_path}/{name}.png')
 
                 if images_so_far == num_images:

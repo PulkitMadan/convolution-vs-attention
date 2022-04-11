@@ -31,8 +31,8 @@ def binary_acc(y_pred, y_test):
 
 def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
     #early stopping
-    the_last_loss = 100
-    patience = 5
+    best_loss = 100
+    patience = 8
     trigger_times = 0
 
     #acc and loss list
@@ -68,7 +68,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
             # Iterate over data.
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(device)
-                labels = labels.to(device)
+                labels = labels.type(torch.LongTensor).to(device)
                 # print(labels)
                 # zero the parameter gradients
                 optimizer.zero_grad()
@@ -78,10 +78,10 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    print(outputs)
-                    print(preds)
+                    #print(outputs)
+                    #print(preds)
                     loss = criterion(outputs, labels)
-                    print(loss)
+                    #print(loss)
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
@@ -124,7 +124,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
                     model_save_load(model=model,path=path_to_model)
         print()
         #early stopping
-        if the_current_loss > the_last_loss:
+        if the_current_loss > best_loss:
             trigger_times += 1
             print('Trigger times:', trigger_times)
 
@@ -139,9 +139,9 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
                 model.load_state_dict(best_model_wts)
                 return model,loss_stats,accuracy_stats
         else:
+            best_loss = the_current_loss
             print('Trigger times: 0')
             trigger_times = 0
-        the_last_loss = the_current_loss
 
 
     time_elapsed = time.time() - since
@@ -169,7 +169,7 @@ def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
 
 def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
     #early stopping
-    the_last_loss = 100
+    best_loss = 100
     patience = 5
     trigger_times = 0
 
@@ -262,7 +262,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
                     model_save_load(model=model,path=path_to_model)
         print()
         #early stopping
-        if the_current_loss > the_last_loss:
+        if the_current_loss > best_loss:
             trigger_times += 1
             print('Trigger times:', trigger_times)
 
@@ -277,9 +277,9 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
                 model.load_state_dict(best_model_wts)
                 return model,loss_stats,accuracy_stats
         else:
+            best_loss = the_current_loss
             print('Trigger times: 0')
             trigger_times = 0
-        the_last_loss = the_current_loss
 
 
     time_elapsed = time.time() - since

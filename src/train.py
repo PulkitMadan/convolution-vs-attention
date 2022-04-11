@@ -157,7 +157,7 @@ def main(args):
             else: 
                 param.requires_grad = True 
                 trainable_params += param.flatten().size()[0]
-        print(f'{trainable_params=}')
+        print(f'{trainable_params}=')
 
 
 
@@ -174,7 +174,14 @@ def main(args):
 
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
+        
+        #TODO switch for SIN
+        net = models.resnet50(pretrained=args.pretrain)
+        # Set the size of each output sample to class_size
+        net.fc = nn.Linear(net.fc.in_features, 207)
         net = model_save_load(save=False,model=net,path=path_to_model)
+
+        net = nn.Sequential(net,nn.Linear(net.fc.out_features, class_size))
 
 
     print(f'Training on {args.model}')
