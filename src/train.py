@@ -19,7 +19,7 @@ from sklearn.metrics import classification_report
 from models.coatnet import coatnet_0
 from models.convnext import convnext_small
 from utils.utils import seed_all, freemem
-from data.load_data import print_datamap, dataload, dataload_Mela
+from data.load_data import print_datamap, dataload, dataload_Mela, dataload_combined_datasets
 from models.default_train import model_default_train, model_save_load,load_model, model_default_train_m
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model, eval_test
 import wandb
@@ -85,6 +85,12 @@ def add_args(parser):
         action='store_true',
         help="use melanoma dataset",
     )
+    parser.add_argument(
+        "--combined_data",
+        default=False,
+        action='store_true',
+        help="Use the combined original IN and SIN",
+    )
     return parser
 
 #main function
@@ -100,6 +106,10 @@ def main(args):
         print('loaded melanoma data')
         class_size = 2
         _,dataloaders,dataset_sizes= dataload_Mela(batch_size=batch_size_default)
+    elif args.combined_data:
+        print('Loading combined IN and SIN data')
+        class_size = 207
+        _,dataloaders,dataset_sizes= dataload_combined_datasets(batch_size=batch_size_default)
     else:
         print('loaded SIN data')
         class_size = 207
