@@ -212,7 +212,7 @@ class OrigINDatasetLinux(Dataset):
 
     def __getitem__(self, index):
         image_path = self.image_paths[index]
-        x = Image.open(image_path)
+        x = Image.open(image_path).convert('RGB')
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
         elif 'val' in image_path:
@@ -260,7 +260,7 @@ class OrigINDatasetWindows(Dataset):
 
     def __getitem__(self, index):
         image_path = self.image_paths[index]
-        x = Image.open(image_path)
+        x = Image.open(image_path).convert('RGB')
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
         elif 'val' in image_path:
