@@ -103,12 +103,12 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
-                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss.item(),"Train epoch_acc": epoch_acc.item()})
+                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
                 accuracy_stats['val'].append(epoch_acc)
-                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss.item(),"Valid epoch_acc": epoch_acc.item()})
+                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss,"Valid epoch_acc": epoch_acc})
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
@@ -242,12 +242,12 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
-                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss.item(),"Train epoch_acc": epoch_acc.item()})
+                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
                 accuracy_stats['val'].append(epoch_acc)
-                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss.item(),"Valid epoch_acc": epoch_acc.item()})
+                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss,"Valid epoch_acc": epoch_acc})
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
