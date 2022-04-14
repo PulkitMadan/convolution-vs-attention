@@ -91,6 +91,11 @@ def add_args(parser):
         action='store_true',
         help="Use the combined original IN and SIN",
     )
+    parser.add_argument(
+        "--name",
+        type=str,
+        help="Name of the run",
+    )
     return parser
 
 #main function
@@ -247,13 +252,13 @@ def main(args):
 
 
 if __name__ == "__main__":
-    #initialize wandb project
-    wandb.init(project="CNNs vs Transformers")
 
     #arguments
     parser = ArgumentParser()
     parser = add_args(parser)
     args = parser.parse_args()
+    #initialize wandb project
+    wandb.init(project="CNNs vs Transformers", name=args.name)
 
     #where the magic happens
     main(args)
