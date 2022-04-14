@@ -54,7 +54,8 @@ wandb login $WANDB_API_KEY
 
 # Run Script
 # training
-python train.py --train --model resnet --pretrain #--load
+# --name => Name of your Wandb experiment.
+python train.py --train --model convnext --pretrain --name ABC1 #--load
 # testing
 python train.py --model resnet --pretrain --load
 
