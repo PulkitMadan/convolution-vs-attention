@@ -32,7 +32,7 @@ def binary_acc(y_pred, y_test):
 def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
     #early stopping
     best_loss = 100
-    patience = 10
+    patience = 22
     trigger_times = 0
 
     #acc and loss list
@@ -156,7 +156,8 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
 #Defaults
 def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
     model.to(device=device)
-    criterion = nn.CrossEntropyLoss().to(device=device)
+    class_weights = torch.FloatTensor([0.187,0.813]).to(device=device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights).to(device=device)
     # Observe that all parameters are being optimized
     optimizer_ft = optim.AdamW(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.01)
 
