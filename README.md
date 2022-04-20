@@ -159,6 +159,12 @@ Run testing/visualization:
 
     python train.py --model resnet --pretrain --load
 
+Additional arguments for `train.py`:
+
+* `--frozen`: Freeze model parameters except for the last layer
+* `--mela`: Use the melanoma dataset
+* `--combined_data`: Use the combined original IN and SIN dataset
+* `--name`: Set the name of the run in WandB
 
 ## Run on Cluster
 In home directory, run the following:

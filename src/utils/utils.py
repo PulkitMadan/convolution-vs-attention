@@ -5,6 +5,7 @@ import torch
 import numpy as np
 import random
 
+#define seed for reproducibility
 def seed_all(seed):
     """
     Seed Python, Numpy and Pytorch for reproducibility.

@@ -6,17 +6,19 @@ import seaborn as sns
 import torch
 import os
 
+from sklearn.metrics import classification_report, confusion_matrix
+#class mapping functions
 from data.load_data import class_16_listed, map207_to_16names, map207_to_16, mapping_207_reverse
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+#define path for visualizations
 if os.name == 'nt': #windows
     fig_path = os.path.abspath(f'./visualization')
 else: #linux
     home_path = os.path.expanduser('~')
     fig_path = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/src/visualization'
 
-from sklearn.metrics import classification_report, confusion_matrix
-
+#visualize training/val loss and accuracy
 def visualize_loss_acc(loss_stats, accuracy_stats,name='loss_acc_plot'):
     # Create dataframes
     train_val_acc_df = pd.DataFrame.from_dict(accuracy_stats).reset_index().melt(id_vars=['index']).rename(columns={"index":"epochs"})
@@ -84,6 +86,8 @@ def accuracy_topk(output: torch.Tensor, target: torch.Tensor, topk=(1,)) -> list
             topk_acc = tot_correct_topk / batch_size  # topk accuracy for entire batch
             list_topk_accs.append(topk_acc)
         return list_topk_accs  # list of topk accuracies for entire batch [topk1, topk2, ... etc]
+
+#Classification report and confusion matrix evaluation on melanoma dataset
 def eval_test(model, dataloaders,dataset_sizes):
     model.to(device=device)
     y_pred_list = []
@@ -113,6 +117,7 @@ def eval_test(model, dataloaders,dataset_sizes):
 
     return acc
 
+# Evaluate K top predictions on SIN dataset
 def topk_eval_test(model, dataloaders,topk=(1,5,10,20),class_map = mapping_207_reverse):
     model.to(device=device)
 
@@ -153,6 +158,7 @@ def topk_eval_test(model, dataloaders,topk=(1,5,10,20),class_map = mapping_207_r
 
     return topk_acc_all
 
+#Shape Bias dataframe and dictionary results
 def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
     model.to(device=device)
 
@@ -282,7 +288,7 @@ def shape_bias(model, dataloaders,class_map = mapping_207_reverse):
     return result_dict, shape_bias_df, shape_bias_df_nc
 
 
-
+#Confusion Matrix of 16 SIN class classification
 def confusion_matrix_hm(y_pred,y_test, name = 'confusion_matrix',categories = class_16_listed):
     actual = pd.Categorical(y_test, categories=categories)
     predict  = pd.Categorical(y_pred, categories=categories)
@@ -295,7 +301,7 @@ def confusion_matrix_hm(y_pred,y_test, name = 'confusion_matrix',categories = cl
     #plt.show()
     plt.savefig(f'{fig_path}/{name}.png')
 
-
+#Sample images from Shape Bias prediction
 def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_map = mapping_207_reverse, num_images=2):
     model.to(device=device)
     was_training = model.training
@@ -324,49 +330,30 @@ def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_
 
                 pred_nameid = class_map[preds[j]]
                 pred_name = map207_to_16names(pred_nameid)
-                
                 lab_nameid = class_map[shapes[j]]
                 lab_name = map207_to_16names(lab_nameid)
-                
                 tex_nameid = class_map[textures[j]]
                 tex_name = map207_to_16names(tex_nameid)
-
 
                 if (pred_name == lab_name) and (tex_name != lab_name) and (lab_cor ==0):
                     lab_cor = 1
                     images_so_far += 1
                     ax = plt.subplot(num_images//2, 2, images_so_far)
                     ax.axis('off')
-
-                
-
                     nl = '\n'
-
                     ax.set_title(f'Predicted: {pred_name}, ID: {pred_nameid} {nl} True: {lab_name}, ID: {lab_nameid} {nl} Texture: {tex_name}, ID: {tex_nameid}')
-
-
                     imshow(inputs.cpu().data[j])
-
                     #plt.suptitle('Sample predictions')
-
                     plt.gcf().set_size_inches(12, 7)
                 
                 if (pred_name == tex_name) and (tex_name != lab_name):
                     images_so_far += 1
                     ax = plt.subplot(num_images//2, 2, images_so_far)
                     ax.axis('off')
-
-                
-
                     nl = '\n'
-
                     ax.set_title(f'Predicted: {pred_name}, ID: {pred_nameid} {nl} True: {lab_name}, ID: {lab_nameid} {nl} Texture: {tex_name}, ID: {tex_nameid}')
-
-
                     imshow(inputs.cpu().data[j])
-
                     #plt.suptitle('Sample predictions')
-
                     plt.gcf().set_size_inches(12, 7)
 
                 plt.tight_layout()
@@ -377,8 +364,7 @@ def visualize_model(model, dataloaders, name = 'model_pred', test = True, class_
                     return
         model.train(mode=was_training)
 
-
-
+#plot sampled image
 def imshow(inp, title=None):
     """Imshow for Tensor."""
     inp = inp.numpy().transpose((1, 2, 0))

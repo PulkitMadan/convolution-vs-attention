@@ -1,3 +1,4 @@
+# CoAtNet Model
 # from https://github.com/chinhsuanwu/coatnet-pytorch
 
 import torch

@@ -159,7 +159,32 @@ def main(args):
     
     
     wandb.watch(net)
+
+
+
+
+    # Load model from save to scratch, if granted and exist
+    model_name = args.model
+    if os.name == 'nt': #windows
+        path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
+    else: #linux
+        home_path = os.path.expanduser('~')
+        path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+    print(path_to_model)
+    if os.path.exists(path_to_model) and args.load:
+        print('Model loaded!')
+        #Change fc layer for IN & SIN trained model 207 classes (Unfrozen)
+        if args.mela:
+            # net = models.resnet50(pretrained=args.pretrain)
+            # Set the size of each output sample to class_size
+            net.fc = nn.Linear(net.fc.in_features, 207)
+            net = model_save_load(save=False,model=net,path=path_to_model)
+            net.fc = nn.Linear(net.fc.in_features, class_size)
+        else:
+            net = model_save_load(save=False,model=net,path=path_to_model)
     
+    
+    #Freeze layers
     trainable_params = 0
     target = 'fc'
     if args.pretrain and args.frozen:
@@ -173,34 +198,6 @@ def main(args):
                 param.requires_grad = True 
                 trainable_params += param.flatten().size()[0]
         print(f'{trainable_params}=')
-
-
-
-    # Load model from save to scratch, if granted and exist
-    model_name = args.model
-   
-    if os.name == 'nt': #windows
-        path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
-    else: #linux
-        home_path = os.path.expanduser('~')
-        path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
- 
-    print(path_to_model)
-
-    if os.path.exists(path_to_model) and args.load:
-        print('Model loaded!')
-        
-        #Change fc layer for SIN trained model (Unfrozen)
-        if args.mela:
-            # net = models.resnet50(pretrained=args.pretrain)
-            # # Set the size of each output sample to class_size
-            # net.fc = nn.Linear(net.fc.in_features, 207)
-            net = model_save_load(save=False,model=net,path=path_to_model)
-            # net.fc = nn.Linear(net.fc.in_features, class_size)
-
-        else:
-            net = model_save_load(save=False,model=net,path=path_to_model)
-
     print(f'Training on {args.model}')
     print(net)            
     
@@ -226,7 +223,7 @@ def main(args):
     else:
 
         if args.mela:
-            # acc and classification on test set
+            # acc and classification on melanoma test set
             print(eval_test(net,dataloaders,dataset_sizes))
         
         else:

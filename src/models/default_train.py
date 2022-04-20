@@ -15,20 +15,15 @@ import wandb
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+#Save and Load Model function
 def model_save_load(model,save=True,path='./models/trained_models/model.pth'):
       if save == True:
             torch.save(copy.deepcopy(model.state_dict()), os.path.abspath(path))
       else:
             model.load_state_dict(torch.load(os.path.abspath(path)))
             return model
-def binary_acc(y_pred, y_test):
-    y_pred_tag = torch.log_softmax(y_pred, dim = 1)
-    _, y_pred_tags = torch.max(y_pred_tag, dim = 1)
-    correct_results_sum = (y_pred_tags == y_test).sum().float()
-    acc = correct_results_sum/y_test.shape[0]
-    acc = torch.round(acc * 100)
-    return acc
 
+#Train function for melanoma dataset
 def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
     #early stopping
     best_loss = 100
@@ -153,7 +148,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
     model.load_state_dict(best_model_wts)
     return model,loss_stats,accuracy_stats
 
-#Defaults
+#Default training pipeline for melanoma dataset
 def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
     model.to(device=device)
     class_weights = torch.FloatTensor([0.187,0.813]).to(device=device)
@@ -167,8 +162,7 @@ def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
     return train_model_m(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders,dataset_sizes,device,
                        num_epochs=epoch)
 
-
-
+#Train function for SIN dataset
 def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
     #early stopping
     best_loss = 100
@@ -295,7 +289,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
     return model,loss_stats,accuracy_stats
 
 
-#Defaults
+#Default training pipeline for SIN dataset
 def model_default_train(model,dataloaders,dataset_sizes,device,epoch = 60):
     model.to(device=device)
     criterion = nn.CrossEntropyLoss().to(device=device)
@@ -309,8 +303,7 @@ def model_default_train(model,dataloaders,dataset_sizes,device,epoch = 60):
 
 
 
-#load SIN models
-
+#load pretrained resnet50 models pretrained on SIN and IN
 def load_model(model_name):
 
     model_urls = {
