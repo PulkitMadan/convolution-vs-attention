@@ -99,11 +99,11 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
             
-            wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
             
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
+                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
@@ -239,11 +239,12 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
             
-            wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
+            
             
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
+                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
