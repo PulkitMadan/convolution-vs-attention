@@ -1,13 +1,15 @@
 # imports
 import glob
+import os
+import re
+
+import pandas as pd
 import torch
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
+
 from utils.utils import seed_worker
-import os
-from PIL import Image
-import re
-import pandas as pd
 
 # path to the extracted data
 # data directory
@@ -231,6 +233,7 @@ class OrigINDatasetWindows(Dataset):
     """
     Class representing the dataset consisting of the original IN subset
     """
+
     def __init__(self, image_paths, transform=None):
         self.image_paths = image_paths
         self.transform = transform
@@ -314,19 +317,21 @@ def dataload_combined_datasets(batch_size, data_transforms=data_transforms):
         ood_image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
         orig_IN_image_datasets = {x: OrigINDatasetWindows(glob.glob(f"{orig_IN_data_dir}/{x}/*"), data_transforms[x])
-                              for x in ['test', 'val']}
+                                  for x in ['test', 'val']}
 
-        orig_IN_image_datasets['train'] = OrigINDatasetWindows(glob.glob(f"{orig_IN_data_dir}/train/*/*"), data_transforms['train'])
+        orig_IN_image_datasets['train'] = OrigINDatasetWindows(glob.glob(f"{orig_IN_data_dir}/train/*/*"),
+                                                               data_transforms['train'])
     else:  # linux
         ood_image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
-                          for x in ['test', 'val']}
+                              for x in ['test', 'val']}
 
         ood_image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
         orig_IN_image_datasets = {x: OrigINDatasetLinux(glob.glob(f"{orig_IN_data_dir}/{x}/*"), data_transforms[x])
-                          for x in ['test', 'val']}
+                                  for x in ['test', 'val']}
 
-        orig_IN_image_datasets['train'] = OrigINDatasetLinux(glob.glob(f"{orig_IN_data_dir}/train/*/*"), data_transforms['train'])
+        orig_IN_image_datasets['train'] = OrigINDatasetLinux(glob.glob(f"{orig_IN_data_dir}/train/*/*"),
+                                                             data_transforms['train'])
 
     # Make combined dict by concat orig IN and SIN set lists
     image_datasets = dict()
@@ -346,6 +351,7 @@ def dataload_combined_datasets(batch_size, data_transforms=data_transforms):
     dataset_sizes = {x: len(image_datasets[x]) for x in ['test', 'train', 'val']}
 
     return image_datasets, dataloaders, dataset_sizes
+
 
 def dataload_Mela(batch_size, data_transforms=data_transforms):
     image_datasets = {}

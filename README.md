@@ -1,10 +1,11 @@
 ## Template Instructions and Structure Overview:<br>
 
 ### Template Instructions
+
 1. Clone or directly paste the content of this repository inside your project dir of choice
 2. Edit this present README with your project detail below
-3. If you wish to remove all `info.txt` files in the project once you are familiar with the structure (see below), you 
-can run the following script from the root of the project:
+3. If you wish to remove all `info.txt` files in the project once you are familiar with the structure (see below), you
+   can run the following script from the root of the project:
 
 ```python
 import os
@@ -18,8 +19,8 @@ for f in files:
     except OSError as e:
         print("Error: %s : %s" % (f, e.strerror))
 ```
-4. Finally, remove these instructions and the below structure from this `README.md` file :smile:! Ready to go!
 
+4. Finally, remove these instructions and the below structure from this `README.md` file :smile:! Ready to go!
 
 ### Structure Overview
 
@@ -80,7 +81,6 @@ Don't delete below here!
 
 A brief description of what this project does and who it's for
 
-
 ## Authors
 
 - [@AxelBogos](https://www.github.com/AxelBogos)
@@ -88,11 +88,9 @@ A brief description of what this project does and who it's for
 - [@Jizhou Wang](https://www.github.com/Jawing)
 - [@Abhay Puri](https://www.github.com/abhaypuri)
 
-
 ## Demo
 
 Insert screenshots, gif or link to demo
-
 
 ## Run Locally
 
@@ -110,25 +108,28 @@ Go to the project directory
 
 Create virtual environment
 
-* with venv: 
+* with venv:
+
 ```bash
   python3 -m venv /path-to-new-virtual-env/<env_name>
   (or virtualenv /path-to-new-virtual-env/<env_name>)
   source /path-to-new-virtual-env/<env_name>/bin/activate
   pip install -r requirements.txt
 ```
-* with conda: 
+
+* with conda:
+
 ```bash
 conda create --name <env_name> --file requirements.txt
 conda activate <env_name>
 ```
-* with conda (environment.yml)  
 
-Conda uses the provided `environment.yml` file.
-You can ignore `requirements.txt` if you choose this method.
-Make sure you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/products/individual) installed on your system.
-Once installed, open up your terminal (or Anaconda prompt if you're on Windows).
-Install the environment from the specified environment file:
+* with conda (environment.yml)
+
+Conda uses the provided `environment.yml` file. You can ignore `requirements.txt` if you choose this method. Make sure
+you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+or [Anaconda](https://www.anaconda.com/products/individual) installed on your system. Once installed, open up your
+terminal (or Anaconda prompt if you're on Windows). Install the environment from the specified environment file:
 
     conda env create --file environment.yml
     conda activate <env_name>
@@ -141,7 +142,8 @@ You should now be able to launch jupyter and see your conda environment:
 
     jupyter-lab
 
-If you make updates to your conda `environment.yml`, you can use the update command to update your existing environment rather than creating a new one:
+If you make updates to your conda `environment.yml`, you can use the update command to update your existing environment
+rather than creating a new one:
 
     conda env update --file environment.yml    
 
@@ -167,6 +169,7 @@ Additional arguments for `train.py`:
 * `--name`: Set the name of the run in WandB
 
 ## Run on Cluster
+
 In home directory, run the following:
 
     git clone https://github.com/PulkitMadan/convolution-vs-attention.git
@@ -182,13 +185,13 @@ To run this project, you will need to add the following environment variables to
 `ANOTHER_API_KEY`
 
 ## WandB Run Locally
+
 Install wandb library and login: <br>
-    ```pip install wandb``` <br>
-    ```wandb login``` <br>
+```pip install wandb``` <br>
+```wandb login``` <br>
 You have to put your API key. You can get it from here https://wandb.ai/authorize
 
 Then you can run your respective Python command.
-
 
 ## Documentation
 

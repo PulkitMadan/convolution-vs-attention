@@ -1,10 +1,5 @@
 import os
 
-labels_dict = {
-    0: 'LABEL_0',
-    1: 'LABEL_1'
-}
-
 # Define data directory relative to this file to avoid base PYTHON PATH issues
 data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 

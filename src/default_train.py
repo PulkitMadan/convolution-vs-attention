@@ -1,36 +1,35 @@
-#imports
-import torch
-import os
+# imports
 import copy
+import os
 import time
-from tqdm import tqdm
 
-import torchvision
+import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils import model_zoo
-from torch.optim import lr_scheduler
-
+import torchvision
 import wandb
+from torch.optim import lr_scheduler
+from torch.utils import model_zoo
+from tqdm import tqdm
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-#Save and Load Model function
-def model_save_load(model,save=True,path='./models/trained_models/model.pth'):
-      if save == True:
-            torch.save(copy.deepcopy(model.state_dict()), os.path.abspath(path))
-      else:
-            model.load_state_dict(torch.load(os.path.abspath(path)))
-            return model
+# Save and Load Model function
+def model_save_load(model, save=True, path='./models/trained_models/model.pth'):
+    if save == True:
+        torch.save(copy.deepcopy(model.state_dict()), os.path.abspath(path))
+    else:
+        model.load_state_dict(torch.load(os.path.abspath(path)))
+        return model
 
-#Train function for melanoma dataset
-def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
-    #early stopping
+
+# Train function for melanoma dataset
+def train_model_m(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
+    # early stopping
     best_loss = 100
     patience = 22
     trigger_times = 0
 
-    #acc and loss list
+    # acc and loss list
     accuracy_stats = {
         'train': [],
         "val": []
@@ -39,7 +38,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
         'train': [],
         "val": []
     }
-    
+
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -51,11 +50,11 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
 
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
-            #print(phase)
+            # print(phase)
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
-                model.eval()   # Set model to evaluate mode
+                model.eval()  # Set model to evaluate mode
 
             running_loss = 0.0
             running_corrects = 0
@@ -73,10 +72,10 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    #print(outputs)
-                    #print(preds)
+                    # print(outputs)
+                    # print(preds)
                     loss = criterion(outputs, labels)
-                    #print(loss)
+                    # print(loss)
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
@@ -93,32 +92,31 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
-            
-            
+
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
-                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
+                wandb.log({"epoch": epoch, "Train epoch_loss": epoch_loss, "Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
                 accuracy_stats['val'].append(epoch_acc)
-                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss,"Valid epoch_acc": epoch_acc})
+                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss, "Valid epoch_acc": epoch_acc})
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
-                #save current best
-                if os.name == 'nt': #windows
+                # save current best
+                if os.name == 'nt':  # windows
                     path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
-                    model_save_load(model=model,path=path_to_model)
-                else: #linux
+                    model_save_load(model=model, path=path_to_model)
+                else:  # linux
                     home_path = os.path.expanduser('~')
                     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
-                    model_save_load(model=model,path=path_to_model)
+                    model_save_load(model=model, path=path_to_model)
         print()
-        #early stopping
+        # early stopping
         if the_current_loss > best_loss:
             trigger_times += 1
             print('Trigger times:', trigger_times)
@@ -132,12 +130,11 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
 
                 # load best model weights
                 model.load_state_dict(best_model_wts)
-                return model,loss_stats,accuracy_stats
+                return model, loss_stats, accuracy_stats
         else:
             best_loss = the_current_loss
             print('Trigger times: 0')
             trigger_times = 0
-
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
@@ -146,12 +143,13 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders,dataset_si
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model,loss_stats,accuracy_stats
+    return model, loss_stats, accuracy_stats
 
-#Default training pipeline for melanoma dataset
-def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
+
+# Default training pipeline for melanoma dataset
+def model_default_train_m(model, dataloaders, dataset_sizes, device, epoch):
     model.to(device=device)
-    class_weights = torch.FloatTensor([0.187,0.813]).to(device=device)
+    class_weights = torch.FloatTensor([0.187, 0.813]).to(device=device)
     criterion = nn.CrossEntropyLoss(weight=class_weights).to(device=device)
     # Observe that all parameters are being optimized
     optimizer_ft = optim.AdamW(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0.01)
@@ -159,17 +157,18 @@ def model_default_train_m(model,dataloaders,dataset_sizes,device,epoch = 60):
     # Decay LR by a factor of 0.1 every 20 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
     wandb.log({"lr": optimizer_ft.param_groups[0]["lr"]})
-    return train_model_m(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders,dataset_sizes,device,
-                       num_epochs=epoch)
+    return train_model_m(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
+                         num_epochs=epoch)
 
-#Train function for SIN dataset
-def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_sizes,device, num_epochs=25):
-    #early stopping
+
+# Train function for SIN dataset
+def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
+    # early stopping
     best_loss = 100
     patience = 5
     trigger_times = 0
 
-    #acc and loss list
+    # acc and loss list
     accuracy_stats = {
         'train': [],
         "val": []
@@ -178,7 +177,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
         'train': [],
         "val": []
     }
-    
+
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -190,11 +189,11 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
 
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
-            #print(phase)
+            # print(phase)
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
-                model.eval()   # Set model to evaluate mode
+                model.eval()  # Set model to evaluate mode
 
             running_loss = 0.0
             running_corrects = 0
@@ -203,7 +202,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(device)
                 labels = labels[0].to(device)
-                #print(inputs)
+                # print(inputs)
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
@@ -212,17 +211,17 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    #print(outputs)
-                    #print(preds)
+                    # print(outputs)
+                    # print(preds)
                     loss = criterion(outputs, labels)
-                    #print(loss)
+                    # print(loss)
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
 
                 # statistics
-                running_loss += loss.item() * inputs.size(0) 
+                running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
             if phase == 'train':
                 scheduler.step()
@@ -232,33 +231,31 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
-            
-            
-            
+
             if phase == 'train':
                 loss_stats['train'].append(epoch_loss)
                 accuracy_stats['train'].append(epoch_acc)
-                wandb.log({"epoch": epoch,"Train epoch_loss": epoch_loss,"Train epoch_acc": epoch_acc})
+                wandb.log({"epoch": epoch, "Train epoch_loss": epoch_loss, "Train epoch_acc": epoch_acc})
             else:
                 the_current_loss = epoch_loss
                 loss_stats['val'].append(epoch_loss)
                 accuracy_stats['val'].append(epoch_acc)
-                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss,"Valid epoch_acc": epoch_acc})
+                wandb.log({"epoch": epoch, "Valid epoch_loss": epoch_loss, "Valid epoch_acc": epoch_acc})
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
-                #save current best
-                if os.name == 'nt': #windows
+                # save current best
+                if os.name == 'nt':  # windows
                     path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
-                    model_save_load(model=model,path=path_to_model)
-                else: #linux
+                    model_save_load(model=model, path=path_to_model)
+                else:  # linux
                     home_path = os.path.expanduser('~')
                     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
-                    model_save_load(model=model,path=path_to_model)
+                    model_save_load(model=model, path=path_to_model)
         print()
-        #early stopping
+        # early stopping
         if the_current_loss > best_loss:
             trigger_times += 1
             print('Trigger times:', trigger_times)
@@ -272,12 +269,11 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
 
                 # load best model weights
                 model.load_state_dict(best_model_wts)
-                return model,loss_stats,accuracy_stats
+                return model, loss_stats, accuracy_stats
         else:
             best_loss = the_current_loss
             print('Trigger times: 0')
             trigger_times = 0
-
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
@@ -286,11 +282,11 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders,dataset_size
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model,loss_stats,accuracy_stats
+    return model, loss_stats, accuracy_stats
 
 
-#Default training pipeline for SIN dataset
-def model_default_train(model,dataloaders,dataset_sizes,device,epoch = 60):
+# Default training pipeline for SIN dataset
+def model_default_train(model, dataloaders, dataset_sizes, device, epoch):
     model.to(device=device)
     criterion = nn.CrossEntropyLoss().to(device=device)
     # Observe that all parameters are being optimized
@@ -298,18 +294,16 @@ def model_default_train(model,dataloaders,dataset_sizes,device,epoch = 60):
     # Decay LR by a factor of 0.1 every 20 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
     wandb.log({"lr": optimizer_ft.param_groups[0]["lr"]})
-    return train_model(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders,dataset_sizes,device,
+    return train_model(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
                        num_epochs=epoch)
 
 
-
-#load pretrained resnet50 models pretrained on SIN and IN
+# load pretrained resnet50 models pretrained on SIN and IN
 def load_model(model_name):
-
     model_urls = {
-            'resnet50_trained_on_SIN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/6f41d2e86fc60566f78de64ecff35cc61eb6436f/resnet50_train_60_epochs-c8e5653e.pth.tar',
-            'resnet50_trained_on_SIN_and_IN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_train_45_epochs_combined_IN_SF-2a0d100e.pth.tar',
-            'resnet50_trained_on_SIN_and_IN_then_finetuned_on_IN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_finetune_60_epochs_lr_decay_after_30_start_resnet50_train_45_epochs_combined_IN_SF-ca06340c.pth.tar',
+        'resnet50_trained_on_SIN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/6f41d2e86fc60566f78de64ecff35cc61eb6436f/resnet50_train_60_epochs-c8e5653e.pth.tar',
+        'resnet50_trained_on_SIN_and_IN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_train_45_epochs_combined_IN_SF-2a0d100e.pth.tar',
+        'resnet50_trained_on_SIN_and_IN_then_finetuned_on_IN': 'https://bitbucket.org/robert_geirhos/texture-vs-shape-pretrained-models/raw/60b770e128fffcbd8562a3ab3546c1a735432d03/resnet50_finetune_60_epochs_lr_decay_after_30_start_resnet50_train_45_epochs_combined_IN_SF-ca06340c.pth.tar',
     }
 
     if "resnet50" in model_name:
@@ -321,12 +315,13 @@ def load_model(model_name):
 
     elif "alexnet" in model_name:
         print("Using the AlexNet architecture.")
-        
+
         # download model from URL manually and save to desired location
         filepath = "./alexnet_train_60_epochs_lr0.001-b4aa5238.pth.tar"
 
-        assert os.path.exists(filepath), "Please download the AlexNet model yourself from the following link and save it locally: https://drive.google.com/drive/u/0/folders/1GnxcR6HUyPfRWAmaXwuiMdAMKlL1shTn"
-        
+        assert os.path.exists(
+            filepath), "Please download the AlexNet model yourself from the following link and save it locally: https://drive.google.com/drive/u/0/folders/1GnxcR6HUyPfRWAmaXwuiMdAMKlL1shTn"
+
         model = torchvision.models.alexnet(pretrained=False)
         model.features = torch.nn.DataParallel(model.features)
         model.cuda()
