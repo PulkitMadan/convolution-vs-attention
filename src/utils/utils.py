@@ -7,6 +7,20 @@ import numpy as np
 import torch
 
 
+def freeze_backbone(args, net) -> int:
+    trainable_params = 0
+    if 'convnext' in args.model:
+        target = 'head'
+    else:
+        target = 'fc'
+    for name, param in net.named_parameters():
+        if target not in name:
+            param.requires_grad = False
+        else:
+            param.requires_grad = True
+            trainable_params += param.flatten().size()[0]
+    return trainable_params
+
 # define seed for reproducibility
 def seed_all(seed):
     """

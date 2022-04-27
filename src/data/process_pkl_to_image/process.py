@@ -1,4 +1,6 @@
 """
+! NOT IN USE -- THE PROCESS INCLUDED IN THIS FILE DID NOT PROVIDE GOOD QUALITY STYLE-TRANSFERED SAMPLES. !
+
 This file processes the downsampled 64x64 Imagenet dataset as downloaded from https://image-net.org/download-images.php
 The processing consists of :
 1. Unpickling the binary files of the train and val batches

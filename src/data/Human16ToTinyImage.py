@@ -1,5 +1,5 @@
 class ClassConverter:
-    # Source: https://github.com/bethgelab/model-vs-human
+    # Mapping data source: https://github.com/bethgelab/model-vs-human
     def __init__(self):
         self.human16_to_imgnet_id = {
             'knife': ['n03041632'],
