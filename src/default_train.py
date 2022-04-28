@@ -11,6 +11,7 @@ import wandb
 from torch.optim import lr_scheduler
 from torch.utils import model_zoo
 from tqdm import tqdm
+from utils import defines
 
 
 # Save and Load Model function
@@ -108,13 +109,15 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders, dataset_s
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 # save current best
-                if os.name == 'nt':  # windows
-                    path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
-                    model_save_load(model=model, path=path_to_model)
-                else:  # linux
-                    home_path = os.path.expanduser('~')
-                    path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
-                    model_save_load(model=model, path=path_to_model)
+                # if os.name == 'nt':  # windows
+                #     path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
+                #     model_save_load(model=model, path=path_to_model)
+                # else:  # linux
+                #     home_path = os.path.expanduser('~')
+                #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
+                #     model_save_load(model=model, path=path_to_model)
+                path_to_model = os.path.join(defines.TRAINED_MODEL_DIR, 'temp_curr_best.pth')
+                model_save_load(model=model, path=path_to_model)
         print()
         # early stopping
         if the_current_loss > best_loss:
@@ -247,13 +250,15 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 # save current best
-                if os.name == 'nt':  # windows
-                    path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
-                    model_save_load(model=model, path=path_to_model)
-                else:  # linux
-                    home_path = os.path.expanduser('~')
-                    path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
-                    model_save_load(model=model, path=path_to_model)
+                # if os.name == 'nt':  # windows
+                #     path_to_model = os.path.abspath('../models/trained_models/temp_curr_best.pth')
+                #     model_save_load(model=model, path=path_to_model)
+                # else:  # linux
+                #     home_path = os.path.expanduser('~')
+                #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
+                #     model_save_load(model=model, path=path_to_model)
+                path_to_model = os.path.join(defines.TRAINED_MODEL_DIR,'temp_current_best.pth')
+                model_save_load(model=model, path=path_to_model)
         print()
         # early stopping
         if the_current_loss > best_loss:

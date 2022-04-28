@@ -22,8 +22,9 @@ cudnn.benchmark = True
 # set device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f'device: {device}')
-print(torch.cuda.device_count())
-print(torch.cuda.get_device_name(0))
+if torch.cuda.is_available():
+    print(torch.cuda.device_count())
+    print(torch.cuda.get_device_name(0))
 
 
 # main function
@@ -48,12 +49,13 @@ def main(args):
 
     # Load model from save to scratch, if granted and exist
     model_name = args.model
-    if os.name == 'nt':  # windows
-        path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
-    else:  # linux
-        home_path = os.path.expanduser('~')
-        path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
 
+    # if os.name == 'nt':  # windows
+    #     path_to_model = os.path.abspath(f'../models/trained_models/{model_name}.pth')
+    # else:  # linux
+    #     home_path = os.path.expanduser('~')
+    #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+    path_to_model = os.path.join(defines.TRAINED_MODEL_DIR, f'{model_name}.pth')
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
         # Change fc layer for IN & SIN trained model 207 classes (Unfrozen)

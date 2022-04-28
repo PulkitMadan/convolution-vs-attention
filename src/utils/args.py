@@ -1,7 +1,7 @@
 # Imports
 import argparse
 
-import defines
+from utils import defines
 
 
 def parse_args():
@@ -78,13 +78,13 @@ def parse_args():
         help='Early Stopping parameter: Maximum number of epochs to run without validation loss improvements.'
     )
 
-    # I/O dirs
-    parser.add_argument('--output_dir',
-                        default=defines.output_dir,
-                        help='Directory to write models or other data out.')
-    parser.add_argument('--data_dir',
-                        default=defines.data_dir,
-                        help='Directory of tensors, must be split into test/valid/train sets')
+    # # I/O dirs
+    # parser.add_argument('--output_dir',
+    #                     default=defines.output_dir,
+    #                     help='Directory to write models or other data out.')
+    # parser.add_argument('--data_dir',
+    #                     default=defines.data_dir,
+    #                     help='Directory of tensors, must be split into test/valid/train sets')
 
     parser.add_argument('--random_seed',
                         default=123,

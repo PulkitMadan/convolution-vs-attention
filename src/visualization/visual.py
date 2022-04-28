@@ -13,11 +13,12 @@ from data.load_data import class_16_listed, map207_to_16names, mapping_207_rever
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # define path for visualizations
-if os.name == 'nt':  # windows
-    fig_path = os.path.abspath(f'./visualization')
-else:  # linux
-    home_path = os.path.expanduser('~')
-    fig_path = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/src/visualization'
+# if os.name == 'nt':  # windows
+#     fig_path = os.path.abspath(f'./visualization')
+# else:  # linux
+#     home_path = os.path.expanduser('~')
+#     fig_path = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/src/visualization'
+fig_path = os.path.join('visualization')
 
 
 # visualize training/val loss and accuracy
