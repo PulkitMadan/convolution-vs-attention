@@ -1,1 +1,0 @@
-Directory for pdf, LaTeX or HTML files related to an eventual report.
