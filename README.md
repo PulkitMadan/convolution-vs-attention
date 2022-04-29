@@ -22,6 +22,7 @@ in terms of the number of classes and number of sample per class, but differs in
   - [Authors](#authors)
   - [Data](#data)
   - [Data Samples](#data-samples)
+  - [Result Figure](#result-figure)
   - [Run Locally](#run-locally)
   - [Run on Cluster](#run-on-cluster)
   - [Environment Variables](#environment-variables)
