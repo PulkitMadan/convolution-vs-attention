@@ -59,6 +59,12 @@ The ImageNet subset, OOD set and ID sets are also available [here](https://drive
 ![IID_images](reports/figures/IID_images.png)
 ![OOD_images](reports/figures/OOD_images.png)
 
+## Result Figure
+Brief overview of our main result. We see that fine-tuning on our Tiny-ish version of stylized ImageNet push all
+models towards a more shape-biased representation.
+
+![result_overview](reports/figures/shape_bias_visualization.png)
+
 ## Run Locally
 
 Clone the project
