@@ -55,6 +55,7 @@ def main(args):
     # else:  # linux
     #     home_path = os.path.expanduser('~')
     #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
+
     path_to_model = os.path.join(defines.TRAINED_MODEL_DIR, f'{model_name}.pth')
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
