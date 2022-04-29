@@ -1,85 +1,33 @@
-## Template Instructions and Structure Overview:<br>
 
-### Template Instructions
-1. Clone or directly paste the content of this repository inside your project dir of choice
-2. Edit this present README with your project detail below
-3. If you wish to remove all `info.txt` files in the project once you are familiar with the structure (see below), you 
-can run the following script from the root of the project:
+# Convolutional vs Attention Inductive Biases 
+[![GitHub](https://img.shields.io/badge/Repo%20URL-GitHub-green)](https://github.com/PulkitMadan/convolution-vs-attention)
+[![WandB](https://img.shields.io/badge/Experiment%20Tracking-W%26B-orange)](https://wandb.ai/ift6759-avengers/CNNs%20vs%20Transformers)
 
-```python
-import os
-import glob
+Image recognition in computer vision has been regarded as one of the forefront of deep learning with
+Alexnet (Krizhevsky et al., 2012) as one of the first convolutional neural network (CNN) to reach
+a state of the art performance on ImageNet (Deng et al., 2009). Despite the success of CNNs, there has
+been a recent trend with new architectures which utilizes attention modules described as Vision Transformers (ViT)
+(Dosovitskiy et al., 2021). 
 
-files = glob.glob('./**/info.txt', recursive=True)
+These two architectures have been shown to have different inductive biases when trained to classify conflicting
+images based on their shape vs texture (Geirhos et al., 2019). Our experiments have shown that training
+on a more diverse out of distribution (OOD) stylized dataset allows models regardless of architecture to learn a more
+global shape representation. This however does reduce the accuracy for the task which the architecture was first
+pretrained on but allows better performance when generalizing towards other tasks, such as melanoma skin cancer
+classification where both local and global representations are important (Codella et al., 2019).
 
-for f in files:
-    try:
-        os.remove(f)
-    except OSError as e:
-        print("Error: %s : %s" % (f, e.strerror))
-```
-4. Finally, remove these instructions and the below structure from this `README.md` file :smile:! Ready to go!
-
-
-### Structure Overview
-
-```
-├── README.md            <- The top-level README for this project.
-├── data
-│   ├── interim          <- Intermediate data sets that has been transformed, but not yet ready to be used as model input. Basically "Work in progress" data.
-│   ├── processed        <- Processed data sets, ready to be used as model input.
-│   └── raw              <- Raw, untouched, original data
-│
-├── docs                 <- An empty dir to be eventually used as a doc dir, eg for `pydoc` or `sphinx`
-│
-├── bash_scripts         <- Directory for .sh script files
-|
-├── models             
-│   ├── preds            <- Directory for preds of models. Can have sub-directories named after particular models.
-│   ├── trained_models   <- Directory for trained and serialized models (eg .pkl, .pt) files
-|
-├── notebooks            <- Directory for notebooks exploration. Naming convention: ##-initials-description
-|                         Example: '06-ab-initial-data-exploration'
-│
-├── reports              <- Directory for pdf, LaTeX or HTML files related to an eventual report.
-│   └── figures          <- Directory for figures to be included in an report (eg. png, jpgs, html plots).
-│
-├── src                  <- Source code for use in this project.
-│   ├── __init__.py      <- Makes src a Python module
-│   │ 
-│   ├── data             <- Scripts to download or generate data
-│   │
-│   ├── features         <- Scripts to turn raw data into features for modeling
-│   │
-│   ├── models           <- Scripts to train models and then use trained models to make predictions
-│   │
-│   ├── utils            <- Scripts to train models and then use trained models to make predictions
-|   │   ├── args.py      <- default argument parser
-|   │   ├── defines.py   <- default definitions (eg paths)
-│   │
-│   └── visualization    <- Scripts to create exploratory and results oriented visualizations
-│
-├── .gitignore           <- gitignore file, pre-set with common ignores for jupyter notebooks, python and latex
-│
-├── setup.py             <- Make this project pip installable with `pip install -e`
-|
-├── requirements.txt     <- The requirements file for reproducing the environment, e.g.
-│                         generated with `pip freeze > requirements.txt` or `pip list --format=freeze > requirements.txt` if from a conda env
-│   
-├── .env                 <- This file is not in this repository as it is by default in `gitignore`. You might need a local version however. 
-```
-
-<!---
-Don't delete below here!
--->
-
-# Project Title
-
-* [Repo URL](https://github.com/PulkitMadan/convolution-vs-attention)
-* [Experiment tracking URL](https://experiment_tracking_url)
-
-A brief description of what this project does and who it's for
-
+We also introduce a smaller version of stylized-ImageNet, one that is similar in spirit to TinyImageNet (Le et Yang., 2015)
+in terms of the number of classes and number of sample per class, but differs in that it consists of full resolution images.
+### Table of Content
+  - [Authors](#authors)
+  - [Data](#data)
+  - [Data Samples](#data-samples)
+  - [Result Figure](#result-figure)
+  - [Run Locally](#run-locally)
+  - [Run on Cluster](#run-on-cluster)
+  - [Environment Variables](#environment-variables)
+  - [WandB Run Locally](#wandb-run-locally)
+  - [Documentation](#documentation)
 
 ## Authors
 
@@ -88,18 +36,42 @@ A brief description of what this project does and who it's for
 - [@Jizhou Wang](https://www.github.com/Jawing)
 - [@Abhay Puri](https://www.github.com/abhaypuri)
 
+## Data
+To reproduce our experiments, the following datasets are necessary to build the Tiny-ish stylized dataset:
+* 2012 ILSVRC [ImageNet](image-net.org)
+* [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
 
-## Demo
+To build the dataset, 
+1. Download 2012 ILSVRC [ImageNet](image-net.org)
+2. Download [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
+3. Run `src/data/process_image_net_subset.py` to build and save the relevent subsample of ImageNet. You need to modify your local
+paths within the `.py` file
+4. Upload zipped version of ImageNet subset and the Kaggle Painter By Numbers dataset on Colab, a cluster or simply leave it
+on your local machine if you have a reasonably powerful GPU.
+5. Follow instructions in `notebooks/stylize_dataset_colab.ipynb`. The script will need to be run twice, once for in-distribution
+stylizaton and once for OOD stylization. The notebook follows roughly the process given by [bethgelab](https://github.com/bethgelab/stylize-datasets).
+6. You may now experiment with both the OOD and ID stylization sets. To reproduce our setup, use the **OOD sets for train and val**
+and the **ID set for test**. 
 
-Insert screenshots, gif or link to demo
+The ImageNet subset, OOD set and ID sets are also available [here](https://drive.google.com/drive/folders/1_titTLm3vsYMnlKJWz-5ssohmsFF2Zbl?usp=sharing) for now, but might be deleted in the future for storage constraints.
 
+## Data Samples
+
+![IID_images](reports/figures/IID_images.png)
+![OOD_images](reports/figures/OOD_images.png)
+
+## Result Figure
+Brief overview of our main result. We see that fine-tuning on our Tiny-ish version of stylized ImageNet push all
+models towards a more shape-biased representation.
+
+![result_overview](reports/figures/shape_bias_visualization.png)
 
 ## Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/PulkitMadan/convolution-vs-attention.git
 ```
 
 Go to the project directory
@@ -110,25 +82,28 @@ Go to the project directory
 
 Create virtual environment
 
-* with venv: 
+* with venv:
+
 ```bash
   python3 -m venv /path-to-new-virtual-env/<env_name>
   (or virtualenv /path-to-new-virtual-env/<env_name>)
   source /path-to-new-virtual-env/<env_name>/bin/activate
   pip install -r requirements.txt
 ```
-* with conda: 
+
+* with conda:
+
 ```bash
 conda create --name <env_name> --file requirements.txt
 conda activate <env_name>
 ```
-* with conda (environment.yml)  
 
-Conda uses the provided `environment.yml` file.
-You can ignore `requirements.txt` if you choose this method.
-Make sure you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/products/individual) installed on your system.
-Once installed, open up your terminal (or Anaconda prompt if you're on Windows).
-Install the environment from the specified environment file:
+* with conda (environment.yml)
+
+Conda uses the provided `environment.yml` file. You can ignore `requirements.txt` if you choose this method. Make sure
+you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+or [Anaconda](https://www.anaconda.com/products/individual) installed on your system. Once installed, open up your
+terminal (or Anaconda prompt if you're on Windows). Install the environment from the specified environment file:
 
     conda env create --file environment.yml
     conda activate <env_name>
@@ -141,7 +116,8 @@ You should now be able to launch jupyter and see your conda environment:
 
     jupyter-lab
 
-If you make updates to your conda `environment.yml`, you can use the update command to update your existing environment rather than creating a new one:
+If you make updates to your conda `environment.yml`, you can use the update command to update your existing environment
+rather than creating a new one:
 
     conda env update --file environment.yml    
 
@@ -167,6 +143,7 @@ Additional arguments for `train.py`:
 * `--name`: Set the name of the run in WandB
 
 ## Run on Cluster
+
 In home directory, run the following:
 
     git clone https://github.com/PulkitMadan/convolution-vs-attention.git
@@ -175,22 +152,20 @@ In home directory, run the following:
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+To run this project, you will need to add the following environment variables to your `.env` or `.bashrc` file
 
-`API_KEY`
-
-`ANOTHER_API_KEY`
+`$WANDB_API_KEY` : Your [Weights and Biases](https://wandb.ai/home) API Key
 
 ## WandB Run Locally
+
 Install wandb library and login: <br>
-    ```pip install wandb``` <br>
-    ```wandb login``` <br>
+```pip install wandb``` <br>
+```wandb login``` <br>
 You have to put your API key. You can get it from here https://wandb.ai/authorize
 
 Then you can run your respective Python command.
 
-
 ## Documentation
 
-[Documentation](https://linktodocumentation)
+TBA
 

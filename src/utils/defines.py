@@ -1,15 +1,11 @@
 import os
+from pathlib import Path
 
-labels_dict = {
-    0: 'LABEL_0',
-    1: 'LABEL_1'
-}
+# Define data directory
+DATA_DIR = Path(os.path.join('data')).resolve()
 
-# Define data directory relative to this file to avoid base PYTHON PATH issues
-data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
+# Define dir for storing trained models as .pth files
+TRAINED_MODEL_DIR = Path(os.path.join('..', 'models', 'trained_models')).resolve()
 
-# ./output/ by default
-output_dir = os.path.join('output')
-
-# .env file path. Assumed to be in root dir
-dotenv_file_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+assert DATA_DIR.is_dir(), f'{DATA_DIR} is not a valid path'
+assert TRAINED_MODEL_DIR.is_dir(), f'{DATA_DIR} is not a valid path'

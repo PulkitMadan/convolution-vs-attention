@@ -1,3 +1,0 @@
-Directory for notebooks exploration.
-Naming convention: ##-initials-description
-Example: '06-ab-initial-data-exploration'
