@@ -1,10 +1,32 @@
 
-# Project Title
+# Convolutional vs Attention Inductive Biases 
+[![GitHub](https://img.shields.io/badge/Repo%20URL-GitHub-green)](https://github.com/PulkitMadan/convolution-vs-attention)
+[![WandB](https://img.shields.io/badge/Experiment%20Tracking-W%26B-orange)](https://wandb.ai/ift6759-avengers/CNNs%20vs%20Transformers)
 
-* [Repo URL](https://github.com/PulkitMadan/convolution-vs-attention)
-* [Experiment tracking URL](https://experiment_tracking_url)
+Image recognition in computer vision has been regarded as one of the forefront of deep learning with
+Alexnet (Krizhevsky et al., 2012) as one of the first convolutional neural network (CNN) to reach
+a state of the art performance on ImageNet (Deng et al., 2009). Despite the success of CNNs, there has
+been a recent trend with new architectures which utilizes attention modules described as Vision Transformers (ViT)
+(Dosovitskiy et al., 2021). 
 
-A brief description of what this project does and who it's for
+These two architectures have been shown to have different inductive biases when trained to classify conflicting
+images based on their shape vs texture (Geirhos et al., 2019). Our experiments have shown that training
+on a more diverse out of distribution (OOD) stylized dataset allows models regardless of architecture to learn a more
+global shape representation. This however does reduce the accuracy for the task which the architecture was first
+pretrained on but allows better performance when generalizing towards other tasks, such as melanoma skin cancer
+classification where both local and global representations are important (Codella et al., 2019).
+
+We also introduce a smaller version of stylized-ImageNet, one that is similar in spirit to TinyImageNet (Le et Yang., 2015)
+in terms of the number of classes and number of sample per class, but differs in that it consists of full resolution images.
+### Table of Content
+  - [Authors](#authors)
+  - [Data](#data)
+  - [Data Samples](#data-samples)
+  - [Run Locally](#run-locally)
+  - [Run on Cluster](#run-on-cluster)
+  - [Environment Variables](#environment-variables)
+  - [WandB Run Locally](#wandb-run-locally)
+  - [Documentation](#documentation)
 
 ## Authors
 
@@ -13,16 +35,36 @@ A brief description of what this project does and who it's for
 - [@Jizhou Wang](https://www.github.com/Jawing)
 - [@Abhay Puri](https://www.github.com/abhaypuri)
 
-## Demo
+## Data
+To reproduce our experiments, the following datasets are necessary to build the Tiny-ish stylized dataset:
+* 2012 ILSVRC [ImageNet](image-net.org)
+* [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
 
-Insert screenshots, gif or link to demo
+To build the dataset, 
+1. Download 2012 ILSVRC [ImageNet](image-net.org)
+2. Download [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
+3. Run `src/data/process_image_net_subset.py` to build and save the relevent subsample of ImageNet. You need to modify your local
+paths within the `.py` file
+4. Upload zipped version of ImageNet subset and the Kaggle Painter By Numbers dataset on Colab, a cluster or simply leave it
+on your local machine if you have a reasonably powerful GPU.
+5. Follow instructions in `notebooks/stylize_dataset_colab.ipynb`. The script will need to be run twice, once for in-distribution
+stylizaton and once for OOD stylization. The notebook follows roughly the process given by [bethgelab](https://github.com/bethgelab/stylize-datasets).
+6. You may now experiment with both the OOD and ID stylization sets. To reproduce our setup, use the **OOD sets for train and val**
+and the **ID set for test**. 
+
+The ImageNet subset, OOD set and ID sets are also available [here](https://drive.google.com/drive/folders/1_titTLm3vsYMnlKJWz-5ssohmsFF2Zbl?usp=sharing) for now, but might be deleted in the future for storage constraints.
+
+## Data Samples
+
+![IID_images](reports/figures/IID_images.png)
+![OOD_images](reports/figures/OOD_images.png)
 
 ## Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/PulkitMadan/convolution-vs-attention.git
 ```
 
 Go to the project directory
@@ -103,11 +145,9 @@ In home directory, run the following:
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+To run this project, you will need to add the following environment variables to your `.env` or `.bashrc` file
 
-`API_KEY`
-
-`ANOTHER_API_KEY`
+`$WANDB_API_KEY` : Your [Weights and Biases](https://wandb.ai/home) API Key
 
 ## WandB Run Locally
 
@@ -120,5 +160,5 @@ Then you can run your respective Python command.
 
 ## Documentation
 
-[Documentation](https://linktodocumentation)
+TBA
 
