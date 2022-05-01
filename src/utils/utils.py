@@ -8,6 +8,13 @@ import torch
 
 
 def freeze_backbone(args, net) -> int:
+    """
+    Freezes weights of all layers except the final classification layer in-place.
+    Return the number of remaining trainable params
+    :param args: Parsed argument namespace
+    :param net: torch.Module with pre-trained weights to be frozen
+    :return: Number of trainable params as an integer
+    """
     trainable_params = 0
     if 'convnext' in args.model:
         target = 'head'
@@ -20,6 +27,7 @@ def freeze_backbone(args, net) -> int:
             param.requires_grad = True
             trainable_params += param.flatten().size()[0]
     return trainable_params
+
 
 # define seed for reproducibility
 def seed_all(seed):

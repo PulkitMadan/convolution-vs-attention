@@ -8,6 +8,13 @@ from models.convnext import convnext_small
 
 
 def define_model(args, class_size: int):
+    """
+    Creates the desired model architecture based on model name of args.model
+    and initialize pretrained weights if args.pretrain
+    :param args: Parsed argument namespace
+    :param class_size: # of output classes of the task
+    :return: Initialized net as torch.Module
+    """
     if args.model == 'resnet':
         net = models.resnet50(pretrained=args.pretrain)
         # Set the size of each output sample to class_size
@@ -42,3 +49,5 @@ def define_model(args, class_size: int):
         # load original resnet models here
         net = load_model(args.model)
         net.module.fc = nn.Linear(in_features=net.module.fc.in_features, out_features=class_size, bias=True)
+
+    return net

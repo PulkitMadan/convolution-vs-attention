@@ -78,13 +78,14 @@ def parse_args():
         help='Early Stopping parameter: Maximum number of epochs to run without validation loss improvements.'
     )
 
-    # # I/O dirs
-    # parser.add_argument('--output_dir',
-    #                     default=defines.output_dir,
-    #                     help='Directory to write models or other data out.')
-    # parser.add_argument('--data_dir',
-    #                     default=defines.data_dir,
-    #                     help='Directory of tensors, must be split into test/valid/train sets')
+    # I/O dirs
+    parser.add_argument('--trained_model_dir',
+                        default=defines.TRAINED_MODEL_DIR,
+                        help='Directory to write trained models to')
+
+    parser.add_argument('--data_dir',
+                        default=defines.DATA_DIR,
+                        help='Root directory with all datasets (mela, out-of-dist SIN, in-dist SIN.)')
 
     parser.add_argument('--random_seed',
                         default=123,
