@@ -11,7 +11,6 @@ import wandb
 from torch.optim import lr_scheduler
 from torch.utils import model_zoo
 from tqdm import tqdm
-from utils import defines
 
 
 # Save and Load Model function
@@ -24,7 +23,7 @@ def model_save_load(model, save=True, path='./models/trained_models/model.pth'):
 
 
 # Train function for melanoma dataset
-def train_model_m(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
+def train_model_m(model, args, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
     # early stopping
     best_loss = 100
     patience = 22
@@ -116,7 +115,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders, dataset_s
                 #     home_path = os.path.expanduser('~')
                 #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
                 #     model_save_load(model=model, path=path_to_model)
-                path_to_model = os.path.join(defines.TRAINED_MODEL_DIR, 'temp_curr_best.pth')
+                path_to_model = os.path.join(args.trained_model_dir, 'temp_curr_best.pth')
                 model_save_load(model=model, path=path_to_model)
         print()
         # early stopping
@@ -150,7 +149,7 @@ def train_model_m(model, criterion, optimizer, scheduler, dataloaders, dataset_s
 
 
 # Default training pipeline for melanoma dataset
-def model_default_train_m(model, dataloaders, dataset_sizes, device, epoch):
+def model_default_train_m(model, args, dataloaders, dataset_sizes, device, epoch):
     model.to(device=device)
     class_weights = torch.FloatTensor([0.187, 0.813]).to(device=device)
     criterion = nn.CrossEntropyLoss(weight=class_weights).to(device=device)
@@ -160,12 +159,12 @@ def model_default_train_m(model, dataloaders, dataset_sizes, device, epoch):
     # Decay LR by a factor of 0.1 every 20 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
     wandb.log({"lr": optimizer_ft.param_groups[0]["lr"]})
-    return train_model_m(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
+    return train_model_m(model, args, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
                          num_epochs=epoch)
 
 
 # Train function for SIN dataset
-def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
+def train_model(model, args, criterion, optimizer, scheduler, dataloaders, dataset_sizes, device, num_epochs):
     # early stopping
     best_loss = 100
     patience = 5
@@ -257,7 +256,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
                 #     home_path = os.path.expanduser('~')
                 #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/temp_curr_best.pth'
                 #     model_save_load(model=model, path=path_to_model)
-                path_to_model = os.path.join(defines.TRAINED_MODEL_DIR,'temp_current_best.pth')
+                path_to_model = os.path.join(args.trained_model_dir, 'temp_current_best.pth')
                 model_save_load(model=model, path=path_to_model)
         print()
         # early stopping
@@ -291,7 +290,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
 
 
 # Default training pipeline for SIN dataset
-def model_default_train(model, dataloaders, dataset_sizes, device, epoch):
+def model_default_train(model, args, dataloaders, dataset_sizes, device, epoch):
     model.to(device=device)
     criterion = nn.CrossEntropyLoss().to(device=device)
     # Observe that all parameters are being optimized
@@ -299,7 +298,7 @@ def model_default_train(model, dataloaders, dataset_sizes, device, epoch):
     # Decay LR by a factor of 0.1 every 20 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
     wandb.log({"lr": optimizer_ft.param_groups[0]["lr"]})
-    return train_model(model, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
+    return train_model(model, args, criterion, optimizer_ft, exp_lr_scheduler, dataloaders, dataset_sizes, device,
                        num_epochs=epoch)
 
 

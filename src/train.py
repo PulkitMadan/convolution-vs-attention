@@ -33,15 +33,15 @@ def main(args):
     if args.mela:
         print('Loaded melanoma data')
         class_size = 2
-        _, dataloaders, dataset_sizes = dataload_Mela(batch_size=args.batch_size)
+        _, dataloaders, dataset_sizes = dataload_Mela(args,batch_size=args.batch_size)
     elif args.combined_data:
         print('Loading combined IN and SIN data')
         class_size = 207
-        _, dataloaders, dataset_sizes = dataload_combined_datasets(batch_size=args.batch_size)
+        _, dataloaders, dataset_sizes = dataload_combined_datasets(args,batch_size=args.batch_size)
     else:
         print('Loaded SIN data')
         class_size = 207
-        _, dataloaders, dataset_sizes = dataload(batch_size=args.batch_size)
+        _, dataloaders, dataset_sizes = dataload(args,batch_size=args.batch_size)
 
     # initialize model
     net = define_model(args, class_size)
@@ -56,7 +56,7 @@ def main(args):
     #     home_path = os.path.expanduser('~')
     #     path_to_model = f'{home_path}/scratch/code-snapshots/convolution-vs-attention/models/trained_models/{model_name}.pth'
 
-    path_to_model = os.path.join(defines.TRAINED_MODEL_DIR, f'{model_name}.pth')
+    path_to_model = os.path.join(args.trained_model_dir, f'{model_name}.pth')
     if os.path.exists(path_to_model) and args.load:
         print('Model loaded!')
         # Change fc layer for IN & SIN trained model 207 classes (Unfrozen)
@@ -81,9 +81,9 @@ def main(args):
         freemem()
 
         if args.mela:
-            net, net_ls, net_as = model_default_train_m(net, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
+            net, net_ls, net_as = model_default_train_m(net, args, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
         else:
-            net, net_ls, net_as = model_default_train(net, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
+            net, net_ls, net_as = model_default_train(net, args, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
 
         # save model
         model_save_load(model=net, path=path_to_model)

@@ -11,24 +11,6 @@ from torchvision import transforms
 
 from utils.utils import seed_worker
 
-# path to the extracted data
-# data directory
-
-# loading stylized_imagenet & orig IN subset dirs
-if os.name == 'nt':  # windows
-    data_dir = os.path.abspath(f'../data/processed/Stylized_ImageNet_subset_OOD')
-    orig_IN_data_dir = os.path.abspath(f'../data/processed/ImageNet_subset')
-else:  # linux
-    home_path = os.path.expanduser('~')
-    data_dir = f'{home_path}/projects/def-sponsor00/datasets/stylized_imageNet_subset_OOD'
-    orig_IN_data_dir = f'{home_path}/projects/def-sponsor00/datasets/ImageNet_subset'
-
-# loading melanoma dataset
-if os.name == 'nt':  # windows
-    data_dir_m = os.path.abspath(f'../data/processed/Melanoma_dataset')
-else:  # linux
-    home_path = os.path.expanduser('~')
-    data_dir_m = f'{home_path}/projects/def-sponsor00/datasets/Melanoma_dataset'
 
 from data.Human16ToTinyImage import ClassConverter
 
@@ -45,7 +27,7 @@ class_16_listed = list(classconv.human16_to_imgnet_id)
 # set data transforms
 # Data augmentation and normalization for training
 # Just normalization for validation
-data_transforms = {
+default_data_transforms = {
     'test': transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -86,9 +68,7 @@ class MyDataset(Dataset):
         return y
 
     def get_class_label_val(self, image_name):
-        # your method here
         image_name_split = re.split(r"-|_", image_name)
-        # print(image_name_split)
         y = list()
         # original class then texture class
         y.append(mapping_207[image_name_split[0]])  # switch to 1 and 4 for tinyimagenet
@@ -96,9 +76,7 @@ class MyDataset(Dataset):
         return y
 
     def get_class_label_train(self, image_name):
-        # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
-        # print(image_name_split)
         y = list()
         # original class then texture class
         y.append(mapping_207[image_name_split[0]])
@@ -108,8 +86,6 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         image_path = self.image_paths[index]
-        # print(image_path)
-        # print(image_path.split('/')[-1])
         x = Image.open(image_path)
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
@@ -132,9 +108,7 @@ class MyDataset2(Dataset):
         self.transform = transform
 
     def get_class_label(self, image_name):
-        # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
-        # print(image_name_split)
         y = list()
         # original class then texture class
         y.append(mapping_207[image_name_split[1]])
@@ -142,9 +116,7 @@ class MyDataset2(Dataset):
         return y
 
     def get_class_label_val(self, image_name):
-        # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
-        # print(image_name_split)
         y = list()
         # original class then texture class
         y.append(mapping_207[image_name_split[1]])
@@ -152,9 +124,7 @@ class MyDataset2(Dataset):
         return y
 
     def get_class_label_train(self, image_name):
-        # your method here
         image_name_split = re.split(r"-|_|\\", image_name)
-        # print(image_name_split)
         y = list()
         # original class then texture class
         y.append(mapping_207[image_name_split[2]])
@@ -163,8 +133,6 @@ class MyDataset2(Dataset):
 
     def __getitem__(self, index):
         image_path = self.image_paths[index]
-        # print(image_path)
-        # print(image_path.split('/')[-1])
         x = Image.open(image_path)
         if 'train' in image_path:
             y = self.get_class_label_train(image_path.split('/')[-1])
@@ -309,7 +277,12 @@ class MelanomaDataset(Dataset):
         return len(self.df)
 
 
-def dataload_combined_datasets(batch_size, data_transforms=data_transforms):
+def dataload_combined_datasets(args, batch_size, data_transforms=None):
+    if data_transforms is None:
+        data_transforms = default_data_transforms
+    data_dir = os.path.join(args.data_dir, 'Stylized_ImageNet_subset_OOD')
+    orig_IN_data_dir = os.path.join(args.data_dir, 'ImageNet_subset')
+
     if os.name == 'nt':  # windows
         ood_image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                               for x in ['test', 'val']}
@@ -353,7 +326,11 @@ def dataload_combined_datasets(batch_size, data_transforms=data_transforms):
     return image_datasets, dataloaders, dataset_sizes
 
 
-def dataload_Mela(batch_size, data_transforms=data_transforms):
+def dataload_Mela(args, batch_size, data_transforms=None):
+    if data_transforms is None:
+        data_transforms = default_data_transforms
+    data_dir_m = os.path.join(args.data_dir, 'Melanoma_dataset')
+
     image_datasets = {}
     image_datasets['test'] = MelanomaDataset(csv_file=f'{data_dir_m}/ISIC-2017_Test_v2_Part3_GroundTruth.csv',
                                              root_dir=f'{data_dir_m}/test', transforms=data_transforms['test'])
@@ -377,7 +354,11 @@ def dataload_Mela(batch_size, data_transforms=data_transforms):
     return image_datasets, dataloaders, dataset_sizes
 
 
-def dataload(batch_size, data_transforms=data_transforms):
+def dataload(args, batch_size, data_transforms=None):
+    if data_transforms is None:
+        data_transforms = default_data_transforms
+    data_dir = os.path.join(args.data_dir, 'Stylized_ImageNet_subset_OOD')
+
     if os.name == 'nt':  # windows
         print('in windows')
         image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
@@ -391,20 +372,11 @@ def dataload(batch_size, data_transforms=data_transforms):
 
         image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
-    # print(image_datasets['val'][0][1])
-    # print(image_datasets['train'][0][1])
-    # image_datasets_train = datasets.ImageFolder(os.path.join(data_dir, 'train'),
-    #                                           data_transforms['train'])
-
-    # num_workers = 0 otherwise dataloader won't process fast
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
                                                   shuffle=True, num_workers=4, worker_init_fn=seed_worker)
                    for x in ['train', 'val']}
     dataloaders['test'] = torch.utils.data.DataLoader(image_datasets['test'], batch_size=batch_size,
                                                       shuffle=False, num_workers=4)
-
-    # dataloaders_train = torch.utils.data.DataLoader(image_datasets_train, batch_size=4,
-    #                                               shuffle=True, num_workers=4)
 
     dataset_sizes = {x: len(image_datasets[x]) for x in ['test', 'train', 'val']}
 

@@ -10,19 +10,19 @@
 # Arguments
 # $1: Path to code directory
 # Git clone repo
-#git clone -b refactoring_tests https://github.com\/PulkitMadan\/convolution-vs-attention.git
-#echo "finish cloning"
-#echo $PWD
-#
-## Copy code dir to snapshot code dir (rsync outside of compute node/remember to execute if updated code)
-#rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git
-
+git clone -b refactoring_tests https://github.com/PulkitMadan/convolution-vs-attention.git
+# Copy code dir to snapshot code dir (rsync outside of compute node/remember to execute if updated code)
+rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git
+rm -r convolution-vs-attention
 # Copy snapshot code dir to the compute node and cd there
 rsync -av --relative "$1" $SLURM_TMPDIR --exclude ".git"
 # Copy data to SLURM dir (done once)
-# rsync --bwlimit=10mb -av stylized_imageNet_subset_OOD ~/projects/def-sponsor00/datasets/ --exclude .git
-cd $SLURM_TMPDIR/"$1/src"
-
+cd $SLURM_TMPDIR
+echo $PWD
+cd $1
+echo $PWD
+cd src
+echo $PWD
 # Setup environment
 module purge
 module load StdEnv/2020
@@ -33,6 +33,8 @@ module load python/3.9.6
 export PYTHONUNBUFFERED=1
 virtualenv $SLURM_TMPDIR/venv
 source $SLURM_TMPDIR/venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r ../requirements_cluster.txt
 
 # Prints
 echo "Currently using:"
@@ -45,9 +47,6 @@ echo $(pip3 show torch)
 
 #fix for convnext model
 cp ~/scratch/code-snapshots/convolution-vs-attention/src/utils/helpers.py $SLURM_TMPDIR/venv/lib/python3.9/site-packages/timm/models/layers/helpers.py
-
-
-
 python cluster_test.py
 
 #Example with $1 -> set 'scratch/code-snapshots/convolution-vs-attention/'
