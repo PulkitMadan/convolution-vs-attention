@@ -127,11 +127,11 @@ You can create a new environment/requirements file using the commands below:
     conda list -e > requirements.txt
     pip list --format=freeze > requirements.txt
 
-Run training, select --model (resnet,vit,convnext,coatnet):
+Run training, select --model (resnet,vit,convnext,coatnet) and load pretrained weights:
 
-    python train.py --train --model resnet --pretrain --load
+    python train.py --train --model resnet --pretrain  
 
-Run testing/visualization:
+Run testing/visualization with resnet and load fintuned model if available, pretrained model otherwise:
 
     python train.py --model resnet --pretrain --load
 
@@ -141,14 +141,18 @@ Additional arguments for `train.py`:
 * `--mela`: Use the melanoma dataset
 * `--combined_data`: Use the combined original IN and SIN dataset
 * `--name`: Set the name of the run in WandB
+* `--data_dir`: Set the root path of your dataset. By default, `./data/processed`
+* `--trained_model_dir`: Set the path to your directory to store and load trained models.
+* `--patience`: Set early stopping patience. By default 5
+* `--num_epoch`: Set the number of training epochs. By default 80
+* `--batch_size`: Set the mini-batch size. By default 64.
+* `--random_seed`: Set the random seed for reproducibility. By default `123`, recommended not to change. 
 
 ## Run on Cluster
 
-In home directory, run the following:
-
-    git clone https://github.com/PulkitMadan/convolution-vs-attention.git
-    rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git
-    sbatch convolution-vs-attention/bash_scripts/cluster.sh scratch/code-snapshots/convolution-vs-attention/
+See the `cluster.sh` bash script file in `./bash_scripts`. To launch an experiment on the cluster, modify the `python train.py --.....` command at the bottom of the file to your liking, see **Run Locally** for details about the arguments.
+To run the experiment on the cluster, copy `cluster.sh` on the cluster and run 
+`sbatch <your_path...>/cluster.sh scratch/code-snapshots/convolution-vs-attention/`
 
 ## Environment Variables
 
