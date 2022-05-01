@@ -142,7 +142,7 @@ Additional arguments for `train.py`:
 * `--combined_data`: Use the combined original IN and SIN dataset
 * `--name`: Set the name of the run in WandB
 * `--data_dir`: Set the root path of your dataset. By default, `./data/processed`
-* `--trained_model_dir`: Set the path to your directory to store and load trained models.
+* `--trained_model_dir`: Set the path to your directory to store and load trained models. By default, `./models/trained_models`
 * `--patience`: Set early stopping patience. By default 5
 * `--num_epoch`: Set the number of training epochs. By default 80
 * `--batch_size`: Set the mini-batch size. By default 64.
