@@ -18,7 +18,6 @@ rm -r convolution-vs-attention
 # Copy snapshot code dir to the compute node and cd there
 rsync -av --relative "$1" $SLURM_TMPDIR --exclude ".git"
 # Copy data to SLURM dir (done once)
-# rsync --bwlimit=10mb -av stylized_imageNet_subset_OOD ~/projects/def-sponsor00/datasets/ --exclude .git
 cd $SLURM_TMPDIR/"$1/src"
 
 # Setup environment
