@@ -10,7 +10,7 @@
 # Arguments
 # $1: Path to code directory
 # Git clone repo
-git clone -b refactoring_tests https://github.com/PulkitMadan/convolution-vs-attention.git
+git clone https://github.com/PulkitMadan/convolution-vs-attention.git
 
 # Copy code dir to snapshot code dir (rsync outside of compute node/remember to execute if updated code)
 rsync --bwlimit=10mb -av convolution-vs-attention ~/scratch/code-snapshots/ --exclude .git 
