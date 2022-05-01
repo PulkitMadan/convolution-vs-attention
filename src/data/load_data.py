@@ -280,7 +280,7 @@ class MelanomaDataset(Dataset):
 def dataload_combined_datasets(args, batch_size, data_transforms=None):
     if data_transforms is None:
         data_transforms = default_data_transforms
-    data_dir = os.path.join(args.data_dir, 'Stylized_ImageNet_subset_OOD')
+    data_dir = os.path.join(args.data_dir, 'stylized_imageNet_subset_OOD')
     orig_IN_data_dir = os.path.join(args.data_dir, 'ImageNet_subset')
 
     if os.name == 'nt':  # windows
@@ -357,7 +357,8 @@ def dataload_Mela(args, batch_size, data_transforms=None):
 def dataload(args, batch_size, data_transforms=None):
     if data_transforms is None:
         data_transforms = default_data_transforms
-    data_dir = os.path.join(args.data_dir, 'Stylized_ImageNet_subset_OOD')
+    data_dir = os.path.join(args.data_dir, 'stylized_imageNet_subset_OOD')
+    print(f'data dir: {data_dir} \t is dir? {os.path.isdir(data_dir)}')
 
     if os.name == 'nt':  # windows
         print('in windows')
@@ -375,6 +376,7 @@ def dataload(args, batch_size, data_transforms=None):
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
                                                   shuffle=True, num_workers=4, worker_init_fn=seed_worker)
                    for x in ['train', 'val']}
+
     dataloaders['test'] = torch.utils.data.DataLoader(image_datasets['test'], batch_size=batch_size,
                                                       shuffle=False, num_workers=4)
 
