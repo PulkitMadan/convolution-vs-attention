@@ -31,17 +31,17 @@ if torch.cuda.is_available():
 def main(args):
     # load data
     if args.mela:
-        print('Loaded melanoma data')
         class_size = 2
-        _, dataloaders, dataset_sizes = dataload_Mela(args,batch_size=args.batch_size)
+        _, dataloaders, dataset_sizes = dataload_Mela(args, batch_size=args.batch_size)
+        print('Loaded melanoma data')
     elif args.combined_data:
+        class_size = 207
+        _, dataloaders, dataset_sizes = dataload_combined_datasets(args, batch_size=args.batch_size)
         print('Loading combined IN and SIN data')
-        class_size = 207
-        _, dataloaders, dataset_sizes = dataload_combined_datasets(args,batch_size=args.batch_size)
     else:
-        print('Loaded SIN data')
         class_size = 207
-        _, dataloaders, dataset_sizes = dataload(args,batch_size=args.batch_size)
+        _, dataloaders, dataset_sizes = dataload(args, batch_size=args.batch_size)
+        print('Loaded SIN data')
 
     # initialize model
     net = define_model(args, class_size)
@@ -81,9 +81,11 @@ def main(args):
         freemem()
 
         if args.mela:
-            net, net_ls, net_as = model_default_train_m(net, args, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
+            net, net_ls, net_as = model_default_train_m(net, args, dataloaders, dataset_sizes, device,
+                                                        epoch=args.num_epoch)
         else:
-            net, net_ls, net_as = model_default_train(net, args, dataloaders, dataset_sizes, device, epoch=args.num_epoch)
+            net, net_ls, net_as = model_default_train(net, args, dataloaders, dataset_sizes, device,
+                                                      epoch=args.num_epoch)
 
         # save model
         model_save_load(model=net, path=path_to_model)
