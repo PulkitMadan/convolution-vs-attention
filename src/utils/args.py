@@ -1,5 +1,6 @@
 # Imports
 import argparse
+import os.path
 
 from utils import defines
 
@@ -94,6 +95,8 @@ def parse_args():
 
     # Parse, set seed and print args
     args = parser.parse_args()
+    assert(os.path.isdir(args.trained_model_dir), f'Trained model dir not valid: {args.trained_model_dir}')
+    assert(os.path.isdir(args.data_dir), f'data dir not valid: {args.trained_model_dir}')
     print('Arguments are', args)
 
     return args
