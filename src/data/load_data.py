@@ -51,7 +51,7 @@ default_data_transforms = {
 
 # custom dataset
 # linux format
-class MyDataset(Dataset):
+class SIN_Dataset_Linux(Dataset):
     def __init__(self, image_paths, transform=None):
         self.image_paths = image_paths
         # print(image_paths)
@@ -102,7 +102,7 @@ class MyDataset(Dataset):
 
 
 # windows local format
-class MyDataset2(Dataset):
+class Sin_Dataset_Windows(Dataset):
     def __init__(self, image_paths, transform=None):
         self.image_paths = image_paths
         self.transform = transform
@@ -284,10 +284,10 @@ def dataload_combined_datasets(args, batch_size, data_transforms=None):
     orig_IN_data_dir = os.path.join(args.data_dir, 'ImageNet_subset')
 
     if os.name == 'nt':  # windows
-        ood_image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+        ood_image_datasets = {x: Sin_Dataset_Windows(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                               for x in ['test', 'val']}
 
-        ood_image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        ood_image_datasets['train'] = Sin_Dataset_Windows(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
         orig_IN_image_datasets = {x: OrigINDatasetWindows(glob.glob(f"{orig_IN_data_dir}/{x}/*"), data_transforms[x])
                                   for x in ['test', 'val']}
@@ -295,10 +295,10 @@ def dataload_combined_datasets(args, batch_size, data_transforms=None):
         orig_IN_image_datasets['train'] = OrigINDatasetWindows(glob.glob(f"{orig_IN_data_dir}/train/*/*"),
                                                                data_transforms['train'])
     else:  # linux
-        ood_image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+        ood_image_datasets = {x: SIN_Dataset_Linux(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                               for x in ['test', 'val']}
 
-        ood_image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        ood_image_datasets['train'] = SIN_Dataset_Linux(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
         orig_IN_image_datasets = {x: OrigINDatasetLinux(glob.glob(f"{orig_IN_data_dir}/{x}/*"), data_transforms[x])
                                   for x in ['test', 'val']}
@@ -361,16 +361,16 @@ def dataload(args, batch_size, data_transforms=None):
 
     if os.name == 'nt':  # windows
         print('in windows')
-        image_datasets = {x: MyDataset2(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+        image_datasets = {x: Sin_Dataset_Windows(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset2(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = Sin_Dataset_Windows(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
     else:  # linux
         print('in linux')
-        image_datasets = {x: MyDataset(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
+        image_datasets = {x: SIN_Dataset_Linux(glob.glob(f"{data_dir}/{x}/*"), data_transforms[x])
                           for x in ['test', 'val']}
 
-        image_datasets['train'] = MyDataset(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
+        image_datasets['train'] = SIN_Dataset_Linux(glob.glob(f"{data_dir}/train/*/*"), data_transforms['train'])
 
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
                                                   shuffle=True, num_workers=4, worker_init_fn=seed_worker)

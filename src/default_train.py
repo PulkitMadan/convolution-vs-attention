@@ -50,7 +50,6 @@ def train_model_m(model, args, criterion, optimizer, scheduler, dataloaders, dat
 
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
-            # print(phase)
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
@@ -63,8 +62,6 @@ def train_model_m(model, args, criterion, optimizer, scheduler, dataloaders, dat
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(device)
                 labels = labels.type(torch.LongTensor).to(device)
-                # print(labels)
-                # zero the parameter gradients
                 optimizer.zero_grad()
 
                 # forward
@@ -72,10 +69,7 @@ def train_model_m(model, args, criterion, optimizer, scheduler, dataloaders, dat
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    # print(outputs)
-                    # print(preds)
                     loss = criterion(outputs, labels)
-                    # print(loss)
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
@@ -204,7 +198,6 @@ def train_model(model, args, criterion, optimizer, scheduler, dataloaders, datas
             for inputs, labels in tqdm(dataloaders[phase]):
                 inputs = inputs.to(device)
                 labels = labels[0].to(device)
-                # print(inputs)
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
@@ -213,10 +206,7 @@ def train_model(model, args, criterion, optimizer, scheduler, dataloaders, datas
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    # print(outputs)
-                    # print(preds)
                     loss = criterion(outputs, labels)
-                    # print(loss)
                     # backward + optimize only if in training phase
                     if phase == 'train':
                         loss.backward()
