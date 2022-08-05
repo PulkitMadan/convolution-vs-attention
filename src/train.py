@@ -125,8 +125,8 @@ def main(args):
 
 if __name__ == "__main__":
     # Parse arguments
-    args = args.parse_args()
-    rng = seed_all(args.random_seed)
+    args = args.parse_args() # to go in the args.py
+    rng = seed_all(args.random_seed) # to go in the args.py
     # initialize wandb project
     wandb.init(project="CNNs vs Transformers", name=args.name)
 

@@ -6,7 +6,7 @@
 *.json
 
 #ignore all data and models
-data/
+.data/
 models/
 src/wandb
 
