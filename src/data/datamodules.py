@@ -1,15 +1,16 @@
+import glob
 import os
+import re
 from typing import List
 
 import pytorch_lightning as pl
+from PIL import Image
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torchvision import transforms
-from PIL import Image
-from utils import defines
+
 from data.Human16ToTinyImage import ClassConverter
-import re
-import glob
+from utils import defines
 
 default_data_transforms = {
     'test': transforms.Compose([

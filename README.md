@@ -1,5 +1,5 @@
+# Convolutional vs Attention Inductive Biases
 
-# Convolutional vs Attention Inductive Biases 
 [![GitHub](https://img.shields.io/badge/Repo%20URL-GitHub-green)](https://github.com/PulkitMadan/convolution-vs-attention)
 [![WandB](https://img.shields.io/badge/Experiment%20Tracking-W%26B-orange)](https://wandb.ai/ift6759-avengers/CNNs%20vs%20Transformers)
 
@@ -7,7 +7,7 @@ Image recognition in computer vision has been regarded as one of the forefront o
 Alexnet (Krizhevsky et al., 2012) as one of the first convolutional neural network (CNN) to reach
 a state of the art performance on ImageNet (Deng et al., 2009). Despite the success of CNNs, there has
 been a recent trend with new architectures which utilizes attention modules described as Vision Transformers (ViT)
-(Dosovitskiy et al., 2021). 
+(Dosovitskiy et al., 2021).
 
 These two architectures have been shown to have different inductive biases when trained to classify conflicting
 images based on their shape vs texture (Geirhos et al., 2019). Our experiments have shown that training
@@ -16,18 +16,22 @@ global shape representation. This however does reduce the accuracy for the task 
 pretrained on but allows better performance when generalizing towards other tasks, such as melanoma skin cancer
 classification where both local and global representations are important (Codella et al., 2019).
 
-We also introduce a smaller version of stylized-ImageNet, one that is similar in spirit to TinyImageNet (Le et Yang., 2015)
-in terms of the number of classes and number of sample per class, but differs in that it consists of full resolution images.
+We also introduce a smaller version of stylized-ImageNet, one that is similar in spirit to TinyImageNet (Le et Yang.,
+2015)
+in terms of the number of classes and number of sample per class, but differs in that it consists of full resolution
+images.
+
 ### Table of Content
-  - [Authors](#authors)
-  - [Data](#data)
-  - [Data Samples](#data-samples)
-  - [Result Figure](#result-figure)
-  - [Run Locally](#run-locally)
-  - [Run on Cluster](#run-on-cluster)
-  - [Environment Variables](#environment-variables)
-  - [WandB Run Locally](#wandb-run-locally)
-  - [Documentation](#documentation)
+
+- [Authors](#authors)
+- [Data](#data)
+- [Data Samples](#data-samples)
+- [Result Figure](#result-figure)
+- [Run Locally](#run-locally)
+- [Run on Cluster](#run-on-cluster)
+- [Environment Variables](#environment-variables)
+- [WandB Run Locally](#wandb-run-locally)
+- [Documentation](#documentation)
 
 ## Authors
 
@@ -37,23 +41,33 @@ in terms of the number of classes and number of sample per class, but differs in
 - [@Abhay Puri](https://www.github.com/abhaypuri)
 
 ## Data
+
 To reproduce our experiments, the following datasets are necessary to build the Tiny-ish stylized dataset:
+
 * 2012 ILSVRC [ImageNet](image-net.org)
 * [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
 
-To build the dataset, 
+To build the dataset,
+
 1. Download 2012 ILSVRC [ImageNet](image-net.org)
 2. Download [Kaggle Painter by Numbers](https://www.kaggle.com/c/painter-by-numbers)
-3. Run `src/data/process_image_net_subset.py` to build and save the relevent subsample of ImageNet. You need to modify your local
-paths within the `.py` file
-4. Upload zipped version of ImageNet subset and the Kaggle Painter By Numbers dataset on Colab, a cluster or simply leave it
-on your local machine if you have a reasonably powerful GPU.
-5. Follow instructions in `notebooks/stylize_dataset_colab.ipynb`. The script will need to be run twice, once for in-distribution
-stylizaton and once for OOD stylization. The notebook follows roughly the process given by [bethgelab](https://github.com/bethgelab/stylize-datasets).
-6. You may now experiment with both the OOD and ID stylization sets. To reproduce our setup, use the **OOD sets for train and val**
-and the **ID set for test**. 
+3. Run `src/data/process_image_net_subset.py` to build and save the relevent subsample of ImageNet. You need to modify
+   your local
+   paths within the `.py` file
+4. Upload zipped version of ImageNet subset and the Kaggle Painter By Numbers dataset on Colab, a cluster or simply
+   leave it
+   on your local machine if you have a reasonably powerful GPU.
+5. Follow instructions in `notebooks/stylize_dataset_colab.ipynb`. The script will need to be run twice, once for
+   in-distribution
+   stylizaton and once for OOD stylization. The notebook follows roughly the process given
+   by [bethgelab](https://github.com/bethgelab/stylize-datasets).
+6. You may now experiment with both the OOD and ID stylization sets. To reproduce our setup, use the **OOD sets for
+   train and val**
+   and the **ID set for test**.
 
-The ImageNet subset, OOD set and ID sets are also available [here](https://drive.google.com/drive/folders/1_titTLm3vsYMnlKJWz-5ssohmsFF2Zbl?usp=sharing) for now, but might be deleted in the future for storage constraints.
+The ImageNet subset, OOD set and ID sets are also
+available [here](https://drive.google.com/drive/folders/1_titTLm3vsYMnlKJWz-5ssohmsFF2Zbl?usp=sharing) for now, but
+might be deleted in the future for storage constraints.
 
 ## Data Samples
 
@@ -61,6 +75,7 @@ The ImageNet subset, OOD set and ID sets are also available [here](https://drive
 ![OOD_images](reports/figures/OOD_images.png)
 
 ## Result Figure
+
 Brief overview of our main result. We see that fine-tuning on our Tiny-ish version of stylized ImageNet push all
 models towards a more shape-biased representation.
 
@@ -142,16 +157,19 @@ Additional arguments for `train.py`:
 * `--combined_data`: Use the combined original IN and SIN dataset
 * `--name`: Set the name of the run in WandB
 * `--data_dir`: Set the root path of your dataset. By default, `./data/processed`
-* `--trained_model_dir`: Set the path to your directory to store and load trained models. By default, `./models/trained_models`
+* `--trained_model_dir`: Set the path to your directory to store and load trained models. By
+  default, `./models/trained_models`
 * `--patience`: Set early stopping patience. By default 5
 * `--num_epoch`: Set the number of training epochs. By default 80
 * `--batch_size`: Set the mini-batch size. By default 64.
-* `--random_seed`: Set the random seed for reproducibility. By default `123`, recommended not to change. 
+* `--random_seed`: Set the random seed for reproducibility. By default `123`, recommended not to change.
 
 ## Run on Cluster
 
-See the `cluster.sh` bash script file in `./bash_scripts`. To launch an experiment on the cluster, modify the `python train.py --.....` command at the bottom of the file to your liking, see **Run Locally** for details about the arguments.
-To run the experiment on the cluster, copy `cluster.sh` on the cluster and run 
+See the `cluster.sh` bash script file in `./bash_scripts`. To launch an experiment on the cluster, modify
+the `python train.py --.....` command at the bottom of the file to your liking, see **Run Locally** for details about
+the arguments.
+To run the experiment on the cluster, copy `cluster.sh` on the cluster and run
 `sbatch <your_path...>/cluster.sh scratch/code-snapshots/convolution-vs-attention/`
 
 ## Environment Variables

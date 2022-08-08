@@ -4,6 +4,7 @@ Hacked together by / Copyright 2020 Ross Wightman
 from itertools import repeat
 
 import torch
+
 TORCH_MAJOR = int(torch.__version__.split('.')[0])
 TORCH_MINOR = int(torch.__version__.split('.')[1])
 
@@ -19,6 +20,7 @@ def _ntuple(n):
         if isinstance(x, container_abcs.Iterable):
             return x
         return tuple(repeat(x, n))
+
     return parse
 
 

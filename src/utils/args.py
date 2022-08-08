@@ -66,8 +66,6 @@ def parse_args():
         help="use melanoma dataset",
     )
 
-
-
     parser.add_argument(
         "--name",
         type=str,

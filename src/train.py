@@ -1,10 +1,13 @@
 from __future__ import print_function, division
+
 import os
+
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
 import wandb
 from sklearn.metrics import classification_report
+
 from data.datamodules import ImageNetDataModule, StylizedImageNetDataModule
 from data.load_data import dataload, dataload_Mela, dataload_combined_datasets
 from default_train import model_default_train, model_save_load, model_default_train_m

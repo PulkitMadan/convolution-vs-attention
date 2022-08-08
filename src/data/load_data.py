@@ -9,9 +9,6 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from utils.utils import seed_worker
-
-
 from data.Human16ToTinyImage import ClassConverter
 
 classconv = ClassConverter()

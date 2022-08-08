@@ -1,5 +1,6 @@
 from pytorch_pretrained_vit import ViT
 from torchvision import models
+
 from models.coatnet import coatnet_0
 from models.convnext import convnext_small
 
