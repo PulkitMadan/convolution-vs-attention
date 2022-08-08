@@ -41,17 +41,33 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--train_loader",
+        default='imagenet',
+        type=str,
+        help="Source of the train dataloader; available sources: {imagenet, stylized_imagenet}",
+    )
+    parser.add_argument(
+        "--val_loader",
+        default='imagenet',
+        type=str,
+        help="Source of the val dataloader; available sources: {imagenet, stylized_imagenet}",
+    )
+    parser.add_argument(
+        "--test_loader",
+        default='imagenet',
+        type=str,
+        help="Source of the test dataloader; available sources: {imagenet, stylized_imagenet}",
+    )
+
+    parser.add_argument(
         "--mela",
         default=False,
         action='store_true',
         help="use melanoma dataset",
     )
-    parser.add_argument(
-        "--combined_data",
-        default=False,
-        action='store_true',
-        help="Use the combined original IN and SIN",
-    )
+
+
+
     parser.add_argument(
         "--name",
         type=str,
