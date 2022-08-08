@@ -1,34 +1,33 @@
 from __future__ import print_function, division
-
 import os
-
 import torch
-import torch.backends.cudnn as cudnn
 import torch.nn as nn
+import pytorch_lightning as pl
 import wandb
 from sklearn.metrics import classification_report
-
+from data.datamodules import ImageNetDataModule, StylizedImageNetDataModule
 from data.load_data import dataload, dataload_Mela, dataload_combined_datasets
 from default_train import model_default_train, model_save_load, model_default_train_m
-from models.model_definer import define_model
-from utils import args, defines
-from utils.utils import freemem, seed_all, freeze_backbone
+from models.model_definer import define_backbone
+from utils.args import parse_args
+from utils.utils import freemem, get_dataloaders
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model, eval_test
 
-cudnn.benchmark = True
-
-# plt.ion()   # interactive mode
-
-# set device
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(f'device: {device}')
-if torch.cuda.is_available():
-    print(torch.cuda.device_count())
-    print(torch.cuda.get_device_name(0))
+torch.backends.cudnn = True
 
 
 # main function
 def main(args):
+    imagenet_module = ImageNetDataModule()
+    stylized_imagenet_module = StylizedImageNetDataModule()
+
+    # Initialize the datamodules to have direct access to dataloaders
+    imagenet_module.setup()
+    stylized_imagenet_module.setup()
+
+    train_loader, val_loader, test_loader = get_dataloaders(args, imagenet_module, stylized_imagenet_module)
+
+    # --------- OLD ---------------
     # load data
     if args.mela:
         class_size = 2
@@ -44,7 +43,7 @@ def main(args):
         print('Loaded SIN data')
 
     # initialize model
-    net = define_model(args, class_size)
+    net = define_backbone(args, class_size)
     wandb.watch(net)
 
     # Load model from save to scratch, if granted and exist
@@ -125,8 +124,17 @@ def main(args):
 
 if __name__ == "__main__":
     # Parse arguments
-    args = args.parse_args() # to go in the args.py
-    rng = seed_all(args.random_seed) # to go in the args.py
+    args = parse_args()
+    rng = pl.seed_everything(args.random_seed, workers=True)
+
+    # Set device
+    device = torch.device("gpu" if torch.cuda.is_available() else "cpu")
+    print(f'device: {device}')
+    if torch.cuda.is_available():
+        num_device = torch.cuda.device_count()
+        print(torch.cuda.device_count())
+        print(torch.cuda.get_device_name(0))
+
     # initialize wandb project
     wandb.init(project="CNNs vs Transformers", name=args.name)
 

@@ -1,61 +1,35 @@
-# From
-# https://discuss.pytorch.org/t/reproducibility-with-all-the-bells-and-whistles/81097
-
-import random
-
-import numpy as np
+import pytorch_lightning as pl
 import torch
 
 
-def freeze_backbone(args, net) -> int:
-    """
-    Freezes weights of all layers except the final classification layer in-place.
-    Return the number of remaining trainable params
-    :param args: Parsed argument namespace
-    :param net: torch.Module with pre-trained weights to be frozen
-    :return: Number of trainable params as an integer
-    """
-    trainable_params = 0
-    if 'convnext' in args.model:
-        target = 'head'
-    else:
-        target = 'fc'
-    for name, param in net.named_parameters():
-        if target not in name:
-            param.requires_grad = False
-        else:
-            param.requires_grad = True
-            trainable_params += param.flatten().size()[0]
-    return trainable_params
+def get_dataloaders(args, imagenet_module: pl.LightningDataModule, stylized_imagenet_module: pl.LightningDataModule):
+    train_loader = None
+    val_loader = None
+    test_loader = None
 
+    # Define train loader
+    if args.train_loader == 'imagenet':
+        train_loader = imagenet_module.train_dataloader()
+    elif args.train_loader == 'stylized_imagenet':
+        train_loader = stylized_imagenet_module.train_dataloader()
 
-# define seed for reproducibility
-def seed_all(seed):
-    """
-    Seed Python, Numpy and Pytorch for reproducibility.
-    """
+    # Define val loader
+    if args.val_loader == 'imagenet':
+        val_loader = imagenet_module.val_dataloader()
+    elif args.val_loader == 'stylized_imagenet':
+        val_loader = stylized_imagenet_module.val_dataloader()
 
-    if not seed:
-        seed = 123
+    # Define test loader
+    if args.test_loader == 'imagenet':
+        test_loader = imagenet_module.test_dataloader()
+    elif args.train_loader == 'stylized_imagenet':
+        test_loader = stylized_imagenet_module.test_dataloader()
 
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.cuda.manual_seed(seed)
-    # np.random.seed(seed)
-    rng = np.random.default_rng(seed=seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    return rng
+    assert train_loader is not None, f'{args.train_loader} is not a valid DataModule'
+    assert val_loader is not None, f'{args.val_loader} is not a valid DataModule'
+    assert test_loader is not None, f'{args.test_loader} is not a valid DataModule'
 
-
-def seed_worker(worker_id):
-    """
-    Seed data loader workers
-    """
-    worker_seed = torch.initial_seed() % 2 ** 32
-    np.random.seed(worker_seed)
-    random.seed(worker_seed)
+    return train_loader, val_loader, test_loader
 
 
 # free up cuda memory
