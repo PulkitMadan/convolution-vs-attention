@@ -1,10 +1,13 @@
-import numpy as np
 import os
+from typing import List
+
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
+from utils import defines
+from data.Human16ToTinyImage import ClassConverter
 import re
 import glob
 
@@ -29,27 +32,10 @@ default_data_transforms = {
     ]),
 }
 
-from data.Human16ToTinyImage import ClassConverter
 
-classconv = ClassConverter()
-mapping_207 = dict()
-mapping_207_reverse = list(classconv.imgnet_id_to_human16.keys())
-for idx, key in enumerate(mapping_207_reverse):
-    mapping_207[key] = idx
-class_16_listed = list(classconv.human16_to_imgnet_id)
-
-
-def map207_to_16(num):
-    return class_16_listed.index(classconv.imgnet_id_to_human16[num])
-
-
-def map207_to_16names(num):
-    return classconv.imgnet_id_to_human16[num]
-
-
-class BaseDataset(Dataset):
-    def __init__(self, X, y, stage, img_transforms=None):
-        self.X = X
+class ImageBaseDataset(Dataset):
+    def __init__(self, img_paths, y, stage, img_transforms=None):
+        self.img_paths = img_paths
         self.y = y
         self.stage = stage
         if img_transforms is None:
@@ -58,53 +44,143 @@ class BaseDataset(Dataset):
             self.img_transforms = img_transforms
 
     def __len__(self):
-        return self.X.shape[0]
+        return len(self.img_paths)
 
     def __getitem__(self, idx):
+        idx = self.img_paths[idx]
+        X = Image.open(idx)
         stage_transform = self.img_transforms[self.stage]
-        return stage_transform(self.X[idx]), self.y[idx]
+        return stage_transform(X), self.y[idx]
 
 
 class ImageNetDataModule(pl.LightningDataModule):
-    def __init__(self, args):
-        super().__init__()
-        self.data_dir = os.path.join(args.data_dir, 'stylized_imagenet_subset')
+    """
+    Data Module encapsulating the loading and construction of data loaders for the original ImageNet dataset.
+    """
 
-    def prepare_data(self) -> None:
+    def __init__(self, args=None):
+        super().__init__()
+        if args:
+            self.data_dir = os.path.join(args.data_dir, 'processed', 'imagenet_subset')
+            self.batch_size = args.batch_size
+        else:
+            # Default values for testing
+            self.data_dir = os.path.join(defines.DATA_DIR, 'processed', 'imagenet_subset')
+            self.batch_size = 16
+        self.class_converter = ClassConverter()
+        self.train = None
+        self.val = None
+        self.test = None
+
+    def setup(self, stage: str = None) -> None:
+        """
+        This function loads all the images path for the current stage, loads the shape and texture labels
+        based on the images names and initializes the BaseDataset for each train, val, test data loaders.
+        :param stage: String indicating model stage. Can be "fit" or "test".
+        :return: None
+        """
         train_imgs_paths = glob.glob(f"{self.data_dir}/train/*/*")
         val_imgs_paths = glob.glob(f"{self.data_dir}/val/*")
         test_imgs_paths = glob.glob(f"{self.data_dir}/test/*")
 
-        self.X_train, self.y_train = self._helper_load_data(train_imgs_paths, r"-|_|\\", 'train')
-
-    def _helper_load_data(self, img_paths, label_regex, stage):
-        X = [Image.open(img_path) for img_path in img_paths]
-        y = list()
-        for img_path in img_paths:
-            img_name = img_path.split('/')[-1]
-            shape_texture_label = mapping_207[re.split(label_regex, img_name)[0]]
-            if stage == 'train':
-                y.append(shape_texture_label)
-            elif stage == 'val':
-                y.append(shape_texture_label)
-            elif stage == 'test':
-                y.append(shape_texture_label)
-                y.append(shape_texture_label)
-        return X, y
-
-    def setup(self, stage=None):
         if stage == "fit" or stage is None:
-            self.train = BaseDataset(self.X_train, self.y_train)
-            self.val = BaseDataset(self.X_val, self.y_val)
+            y_train = self._helper_get_labels(train_imgs_paths, r"-|_|\\")
+            y_val = self._helper_get_labels(val_imgs_paths, r"-|_")
+
+            self.train = ImageBaseDataset(train_imgs_paths, y_train, 'train')
+            self.val = ImageBaseDataset(val_imgs_paths, y_val, 'val')
+
         if stage == "test" or stage is None:
-            self.test = BaseDataset(self.X_test, self.y_test)
+            y_test = self._helper_get_labels(test_imgs_paths, r"-|_")
+            self.test = ImageBaseDataset(test_imgs_paths, y_test, 'test')
+
+    def _helper_get_labels(self, img_paths: List[str], label_regex: str) -> List[List]:
+        """
+         Iterates an image paths array and extracts the label with a regex. Returns a list of lists as
+         [[shape_label,texture_label],...]. Shape and texture label are identical in the original ImageNet.
+        :param img_paths: List of image paths
+        :param label_regex: regex to extract the label.
+        :return:list of lists as [[shape_label,texture_label],...]
+        """
+        y = list()
+        for img in img_paths:
+            img_name = img.split('/')[-1]
+            label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[0]]
+            y.append([label, label])
+        return y
 
     def train_dataloader(self):
-        return DataLoader(self.train, batch_size=self.batch_size,
-                          num_workers=self.num_workers)
+        return DataLoader(self.train, batch_size=self.batch_size)
 
     def val_dataloader(self):
-        return DataLoader(self.val, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.val, batch_size=self.batch_size)
 
     def test_dataloader(self):
-        return DataLoader(self.test, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.test, batch_size=self.batch_size)
+
+
+class StylizedImageNetDataModule(pl.LightningDataModule):
+    """
+    Data Module encapsulating the loading and construction of data loaders for the stylized ImageNet dataset.
+    """
+
+    def __init__(self, args=None):
+        super().__init__()
+        if args:
+            self.data_dir = os.path.join(args.data_dir, 'processed', 'stylized_imagenet_subset')
+            self.batch_size = args.batch_size
+        else:
+            # Default values for testing
+            self.data_dir = os.path.join(defines.DATA_DIR, 'processed', 'stylized_imagenet_subset')
+            self.batch_size = 16
+        self.class_converter = ClassConverter()
+        self.train = None
+        self.val = None
+        self.test = None
+
+    def setup(self, stage: str = None):
+        """
+        This function loads all the images path for the current stage, loads the shape and texture labels
+        based on the images names and initializes the BaseDataset for each train, val, test data loaders.
+        :param stage: String indicating model stage. Can be "fit" or "test".
+        :return: None
+        """
+        train_imgs_paths = glob.glob(f"{self.data_dir}/train/*/*")
+        val_imgs_paths = glob.glob(f"{self.data_dir}/val/*")
+        test_imgs_paths = glob.glob(f"{self.data_dir}/test/*")
+
+        if stage == "fit" or stage is None:
+            y_train = self._helper_get_labels(train_imgs_paths, r"-|_|\\")
+            self.train = ImageBaseDataset(train_imgs_paths, y_train, 'train')
+
+            y_val = self._helper_get_labels(val_imgs_paths, r"-|_")
+            self.val = ImageBaseDataset(val_imgs_paths, y_val, 'val')
+
+        if stage == "test" or stage is None:
+            y_test = self._helper_get_labels(test_imgs_paths, r"-|_")
+            self.test = ImageBaseDataset(test_imgs_paths, y_test, 'test')
+
+    def _helper_get_labels(self, img_paths, label_regex):
+        """
+         Iterates an image paths array and extracts the label with a regex. Returns a list of lists as
+         [[shape_label,texture_label],...].
+        :param img_paths: List of image paths
+        :param label_regex: regex to extract the label.
+        :return:list of lists as [[shape_label,texture_label],...]
+        """
+        y = list()
+        for img in img_paths:
+            img_name = img.split('/')[-1]
+            shape_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[0]]
+            texture_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[3]]
+            y.append([shape_label, texture_label])
+        return y
+
+    def train_dataloader(self):
+        return DataLoader(self.train, batch_size=self.batch_size)
+
+    def val_dataloader(self):
+        return DataLoader(self.val, batch_size=self.batch_size)
+
+    def test_dataloader(self):
+        return DataLoader(self.test, batch_size=self.batch_size)
