@@ -58,15 +58,10 @@ class ImageNetDataModule(pl.LightningDataModule):
     Data Module encapsulating the loading and construction of data loaders for the original ImageNet dataset.
     """
 
-    def __init__(self, args=None):
+    def __init__(self, batch_size: int = 16, root_data_dir: str = defines.DATA_DIR):
         super().__init__()
-        if args:
-            self.data_dir = os.path.join(args.data_dir, 'processed', 'imagenet_subset')
-            self.batch_size = args.batch_size
-        else:
-            # Default values for testing
-            self.data_dir = os.path.join(defines.DATA_DIR, 'processed', 'imagenet_subset')
-            self.batch_size = 16
+        self.data_dir = os.path.join(root_data_dir, 'processed', 'imagenet_subset')
+        self.batch_size = batch_size
         self.class_converter = ClassConverter()
         self.train = None
         self.val = None
@@ -124,15 +119,10 @@ class StylizedImageNetDataModule(pl.LightningDataModule):
     Data Module encapsulating the loading and construction of data loaders for the stylized ImageNet dataset.
     """
 
-    def __init__(self, args=None):
+    def __init__(self, batch_size: int = 16, root_data_dir: str = defines.DATA_DIR):
         super().__init__()
-        if args:
-            self.data_dir = os.path.join(args.data_dir, 'processed', 'stylized_imagenet_subset')
-            self.batch_size = args.batch_size
-        else:
-            # Default values for testing
-            self.data_dir = os.path.join(defines.DATA_DIR, 'processed', 'stylized_imagenet_subset')
-            self.batch_size = 16
+        self.data_dir = os.path.join(root_data_dir, 'processed', 'stylized_imagenet_subset')
+        self.batch_size = batch_size
         self.class_converter = ClassConverter()
         self.train = None
         self.val = None
