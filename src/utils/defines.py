@@ -5,8 +5,7 @@ from pathlib import Path
 DATA_DIR = Path(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'data')).resolve()
 
 # Define dir for storing trained models as .pth files
-TRAINED_MODEL_DIR = Path(
-    os.path.join(os.path.abspath(__file__), '..', '..', '..', 'trained_models')).resolve()
+TRAINED_MODEL_DIR = Path(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'trained_models')).resolve()
 
-print(f'Root data dir: {DATA_DIR}')
-print(f'Saving models in: {TRAINED_MODEL_DIR}')
+RUNS_OUTPUT_DIR = Path(os.path.join(os.path.abspath(__file__), '..', '..', '..', 'runs_output')).resolve()
+

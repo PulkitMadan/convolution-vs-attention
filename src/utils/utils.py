@@ -1,8 +1,18 @@
 import pytorch_lightning as pl
 import torch
+import os
+import glob
 
 
-def get_dataloaders(args, imagenet_module: pl.LightningDataModule, stylized_imagenet_module: pl.LightningDataModule):
+def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
+                    stylized_imagenet_module: pl.LightningDataModule) -> tuple:
+    """
+    Returns the correct set of train, val and dataloaders depending on the corresponding args values.
+    :param args: Run arguments
+    :param imagenet_module: Original ImageNet lightning DataModule
+    :param stylized_imagenet_module: Stylized ImageNet lightning Datamodule
+    :return: tuple(train_loader, val_loader, test_loader)
+    """
     train_loader = None
     val_loader = None
     test_loader = None
@@ -32,7 +42,61 @@ def get_dataloaders(args, imagenet_module: pl.LightningDataModule, stylized_imag
     return train_loader, val_loader, test_loader
 
 
-# free up cuda memory
-def freemem():
+def args_sanity_check(args) -> None:
+    assert os.path.isdir(args.trained_model_dir), f'Trained model dir not valid: {args.trained_model_dir}'
+    assert os.path.isdir(args.runs_output_dir), f'Runs output dir not valid: {args.runs_output_dir}'
+    assert os.path.isdir(args.data_dir), f'Data dir not valid: {args.data_dir}'
+
+
+    if args.do_train and not args.resume:
+        assert not os.path.isdir(
+            args.runs_output_dir), f'Attempting to train a new model but {args.runs_output_dir} already exists. Verify run_id.'
+
+    # If resuming, output dir & checkpoint file should exist
+    if args.resume:
+        assert os.path.isdir(
+            args.runs_output_dir), f'--resume flag used but {args.runs_output_dir} is not a valid dir. Verify run_id.'
+        assert os.path.isfile(
+            args.checkpoint_path), f'--resume flag used but checkpoint has not been found in  {args.checkpoint_path}. Verify run_id.'
+        assert args.do_train, f'--resume flag used should always be used in tandem with --do_train. Inconsistent run parameters.'
+
+    # If eval with no training, output dir & checkpoint file should exist
+    if not args.do_train and args.do_test:
+        assert os.path.isdir(
+            args.runs_output_dir), f'Attempting to run eval with no training, but {args.runs_output_dir} is not a valid dir. Verify run_id.'
+        assert os.path.isfile(
+            args.checkpoint_path), f'Attempting to run eval with no training, but no checkpoint has been found in {args.checkpoint_path}. Verify run_id.'
+
+    assert args.val_loader == args.test_loader, f'Val loader ({args.val_loader}) and test loader ({args.test_loader}) ' \
+                                                f'should not be different. '
+
+
+def get_device():
+    device = torch.device("gpu" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        num_device = torch.cuda.device_count()
+    else:
+        num_device = 0
+    print(f'device: {device}')
+    print(f'# of cuda device: {num_device}')
+    return device, num_device
+
+
+# def get_most_recent_model_run(args) -> str:
+#     dirs = glob.glob(os.path.join(args.trained_model_dir, f'{args.model_name}_*'))
+#     assert dirs, f'No {args.model_name} models runs in {args.trained_model_dir}'
+#     return sorted(dirs)[-1]
+
+
+def get_checkpoint_path(args) -> str:
+    ckpts = glob.glob(os.path.join(args.run_output_dir, args.run_id, 'checkpoints'))
+    return ckpts[-1]
+
+
+def freemem() -> None:
+    """
+    Frees torch memory cache.
+    :return: None
+    """
     with torch.no_grad():
         torch.cuda.empty_cache()
