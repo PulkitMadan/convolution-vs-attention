@@ -1,7 +1,5 @@
 # from __future__ import print_function, division
-
 import os
-
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -10,7 +8,7 @@ import torch.nn as nn
 import wandb
 from sklearn.metrics import classification_report
 
-from data.datamodules import ImageNetDataModule, StylizedImageNetDataModule
+from data.datamodules import ImageNetDataModule, StylizedImageNetDataModule, OODStylizedImageNetDataModule
 from default_train import model_default_train, model_save_load, model_default_train_m
 from models.model_definer import define_backbone
 from models.lightning_model import LightningModel
@@ -36,25 +34,28 @@ def main():
     # Init data modules
     imagenet_module = ImageNetDataModule()
     stylized_imagenet_module = StylizedImageNetDataModule()
+    ood_stylized_imagenet_module = OODStylizedImageNetDataModule()
 
     # Call setup() to init data loaders
     imagenet_module.setup()
     stylized_imagenet_module.setup()
+    ood_stylized_imagenet_module.setup()
 
     # Get right combination of dataloaders
-    train_loader, val_loader, test_loader = get_dataloaders(args, imagenet_module, stylized_imagenet_module)
+    train_loader, val_loader, test_loader = get_dataloaders(args, imagenet_module, stylized_imagenet_module,
+                                                            ood_stylized_imagenet_module)
 
     # Init pretrained backbone & model
     backbone = define_backbone(args)
-    model = LightningModel(backbone, num_target_class=207, freeze_backbone=args.freeze)
+    model = LightningModel(backbone, num_target_class=207, freeze_backbone=args.frozen)
 
     if args.resume_run or (not args.do_train and args.do_test):
         print(f'Loading model from {args.checkpoint_path}')
         model.load_from_checkpoint(args.checkpoint_path)
 
-    if args.train:
+    if args.do_train:
         freemem()
-        logger = WandbLogger(project='CNNs vs Transformers', name=args.run_name)
+        logger = WandbLogger(project='CNNs vs Transformers', name=args.run_id)
         checkpoint_name = args.model + '-{epoch}-{val_loss:.2f}'
         callbacks = [
             EarlyStopping(monitor="val_loss", mode="min", patience=args.patience),

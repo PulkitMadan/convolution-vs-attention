@@ -59,7 +59,7 @@ class ImageNetDataModule(pl.LightningDataModule):
     Data Module encapsulating the loading and construction of data loaders for the original ImageNet dataset.
     """
 
-    def __init__(self, args):
+    def __init__(self, batch_size: int = 16, root_data_dir: str = defines.DATA_DIR):
         super().__init__()
         self.data_dir = os.path.join(root_data_dir, 'processed', 'imagenet_subset')
         self.batch_size = batch_size
@@ -162,8 +162,9 @@ class StylizedImageNetDataModule(pl.LightningDataModule):
         y = list()
         for img in img_paths:
             img_name = img.split('/')[-1]
-            shape_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[0]]
-            texture_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[3]]
+            split_res = re.split(label_regex, img_name)
+            shape_label = self.class_converter.imgnet_id_to_indices[split_res[0]]
+            texture_label = self.class_converter.imgnet_id_to_indices[split_res[3]]
             y.append([shape_label, texture_label])
         return y
 
@@ -225,7 +226,7 @@ class OODStylizedImageNetDataModule(pl.LightningDataModule):
         for img in img_paths:
             img_name = img.split('/')[-1]
             shape_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[0]]
-            texture_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[3]]
+            texture_label = self.class_converter.imgnet_id_to_indices[re.split(label_regex, img_name)[0]]
             y.append([shape_label, texture_label])
         return y
 

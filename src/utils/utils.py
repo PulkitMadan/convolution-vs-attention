@@ -5,7 +5,8 @@ import glob
 
 
 def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
-                    stylized_imagenet_module: pl.LightningDataModule) -> tuple:
+                    stylized_imagenet_module: pl.LightningDataModule,
+                    ood_stylized_imagenet_module: pl.LightningDataModule) -> tuple:
     """
     Returns the correct set of train, val and dataloaders depending on the corresponding args values.
     :param args: Run arguments
@@ -22,18 +23,25 @@ def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
         train_loader = imagenet_module.train_dataloader()
     elif args.train_loader == 'stylized_imagenet':
         train_loader = stylized_imagenet_module.train_dataloader()
+    elif args.train_loader == 'ood_stylized_imagenet':
+        train_loader = ood_stylized_imagenet_module.train_dataloader()
+
 
     # Define val loader
     if args.val_loader == 'imagenet':
         val_loader = imagenet_module.val_dataloader()
     elif args.val_loader == 'stylized_imagenet':
         val_loader = stylized_imagenet_module.val_dataloader()
+    elif args.train_loader == 'ood_stylized_imagenet':
+        val_loader = ood_stylized_imagenet_module.val_dataloader()
 
     # Define test loader
     if args.test_loader == 'imagenet':
         test_loader = imagenet_module.test_dataloader()
     elif args.train_loader == 'stylized_imagenet':
         test_loader = stylized_imagenet_module.test_dataloader()
+    elif args.train_loader == 'ood_stylized_imagenet':
+        test_loader = ood_stylized_imagenet_module.test_dataloader()
 
     assert train_loader is not None, f'{args.train_loader} is not a valid DataModule'
     assert val_loader is not None, f'{args.val_loader} is not a valid DataModule'
@@ -87,7 +95,7 @@ def get_device():
 #     return sorted(dirs)[-1]
 
 
-def get_checkpoint_path(args) -> str | None:
+def get_checkpoint_path(args):
     ckpts = glob.glob(os.path.join(args.run_output_dir, args.run_id, 'checkpoints'))
     if ckpts:
         return ckpts[-1]

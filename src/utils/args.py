@@ -52,19 +52,21 @@ def parse_args():
     # Trainer and Datamodule arguments
     parser.add_argument(
         "--train_loader",
-        default='imagenet',
+        default='ood_stylized_imagenet',
         type=str,
-        help="Source of the train dataloader; available sources: {imagenet, stylized_imagenet}",
+        help="Source of the train dataloader; available sources: {imagenet, stylized_imagenet, ood_stylized_imagenet}",
     )
     parser.add_argument(
         "--val_loader",
+        default='stylized_imagenet',
         type=str,
-        help="Source of the val dataloader; available sources: {imagenet, stylized_imagenet}",
+        help="Source of the val dataloader; available sources: {imagenet, stylized_imagenet, ood_stylized_imagenet}",
     )
     parser.add_argument(
         "--test_loader",
+        default='stylized_imagenet',
         type=str,
-        help="Source of the test dataloader; available sources: {imagenet, stylized_imagenet}",
+        help="Source of the test dataloader; available sources: {imagenet, stylized_imagenet, ood_stylized_imagenet}",
     )
 
     parser.add_argument(
@@ -79,6 +81,13 @@ def parse_args():
         default=5,
         type=int,
         help='Early Stopping parameter: Maximum number of epochs to run without validation loss improvements.'
+    )
+
+    parser.add_argument(
+        '--pretrained',
+        default=True,
+        type=bool,
+        help='Use pretrained models.'
     )
 
     # I/O dirs
