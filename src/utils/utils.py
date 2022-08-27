@@ -44,18 +44,17 @@ def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
 
 def args_sanity_check(args) -> None:
     assert os.path.isdir(args.trained_model_dir), f'Trained model dir not valid: {args.trained_model_dir}'
-    assert os.path.isdir(args.runs_output_dir), f'Runs output dir not valid: {args.runs_output_dir}'
+    assert os.path.isdir(args.root_runs_output), f'Runs output dir not valid: {args.root_runs_output}'
     assert os.path.isdir(args.data_dir), f'Data dir not valid: {args.data_dir}'
 
-
-    if args.do_train and not args.resume:
+    if args.do_train and not args.resume_run:
         assert not os.path.isdir(
-            args.runs_output_dir), f'Attempting to train a new model but {args.runs_output_dir} already exists. Verify run_id.'
+            args.run_output_dir), f'Attempting to train a new model but {args.run_output_dir} already exists. Verify run_id.'
 
     # If resuming, output dir & checkpoint file should exist
-    if args.resume:
+    if args.resume_run:
         assert os.path.isdir(
-            args.runs_output_dir), f'--resume flag used but {args.runs_output_dir} is not a valid dir. Verify run_id.'
+            args.run_output_dir), f'--resume flag used but {args.run_output_dir} is not a valid dir. Verify run_id.'
         assert os.path.isfile(
             args.checkpoint_path), f'--resume flag used but checkpoint has not been found in  {args.checkpoint_path}. Verify run_id.'
         assert args.do_train, f'--resume flag used should always be used in tandem with --do_train. Inconsistent run parameters.'
@@ -63,7 +62,7 @@ def args_sanity_check(args) -> None:
     # If eval with no training, output dir & checkpoint file should exist
     if not args.do_train and args.do_test:
         assert os.path.isdir(
-            args.runs_output_dir), f'Attempting to run eval with no training, but {args.runs_output_dir} is not a valid dir. Verify run_id.'
+            args.run_output_dir), f'Attempting to run eval with no training, but {args.runs_output_dir} is not a valid dir. Verify run_id.'
         assert os.path.isfile(
             args.checkpoint_path), f'Attempting to run eval with no training, but no checkpoint has been found in {args.checkpoint_path}. Verify run_id.'
 
@@ -88,9 +87,12 @@ def get_device():
 #     return sorted(dirs)[-1]
 
 
-def get_checkpoint_path(args) -> str:
+def get_checkpoint_path(args) -> str | None:
     ckpts = glob.glob(os.path.join(args.run_output_dir, args.run_id, 'checkpoints'))
-    return ckpts[-1]
+    if ckpts:
+        return ckpts[-1]
+    else:
+        return None
 
 
 def freemem() -> None:

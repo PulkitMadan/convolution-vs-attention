@@ -90,7 +90,7 @@ def parse_args():
                         default=defines.DATA_DIR,
                         help='Root directory with all datasets (mela, out-of-dist SIN, in-dist SIN.)')
 
-    parser.add_argument('--runs_output_dir',
+    parser.add_argument('--root_runs_output',
                         default=defines.RUNS_OUTPUT_DIR,
                         help='Directory to save a particular run output')
 
@@ -116,9 +116,8 @@ def parse_args():
 
     # Parse, set seed and print args
     args = parser.parse_args()
-    args.run_output_dir = os.path.join(defines.RUNS_OUTPUT_DIR, args.run_id)
+    args.run_output_dir = os.path.join(args.root_runs_output, args.run_id)
     args.checkpoint_path = get_checkpoint_path(args)
     args_sanity_check(args)
     print('Arguments are', args)
-
     return args

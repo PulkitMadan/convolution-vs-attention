@@ -15,7 +15,7 @@ from default_train import model_default_train, model_save_load, model_default_tr
 from models.model_definer import define_backbone
 from models.lightning_model import LightningModel
 from utils.args import parse_args
-from utils.utils import freemem, get_dataloaders, get_device, get_most_recent_model_run
+from utils.utils import freemem, get_dataloaders, get_device
 from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model, eval_test
 
 torch.backends.cudnn = True
@@ -26,6 +26,9 @@ def main():
     # Parse arguments
     args = parse_args()
     pl.seed_everything(args.random_seed, workers=True)
+
+    if not os.path.isdir(args.run_output_dir):
+        os.mkdir(args.run_output_dir)
 
     # Set device
     device, num_device = get_device()
@@ -45,7 +48,7 @@ def main():
     backbone = define_backbone(args)
     model = LightningModel(backbone, num_target_class=207, freeze_backbone=args.freeze)
 
-    if args.resume or (not args.do_train and args.do_test):
+    if args.resume_run or (not args.do_train and args.do_test):
         print(f'Loading model from {args.checkpoint_path}')
         model.load_from_checkpoint(args.checkpoint_path)
 
