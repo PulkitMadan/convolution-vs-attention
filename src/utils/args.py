@@ -103,6 +103,10 @@ def parse_args():
                         default=defines.RUNS_OUTPUT_DIR,
                         help='Directory to save a particular run output')
 
+    parser.add_argument('--dot_env_path',
+                        default=defines.DOT_ENV_FILE,
+                        help='Path of .env file')
+
     parser.add_argument('--random_seed',
                         default=123,
                         type=int,

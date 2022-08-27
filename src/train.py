@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 import torch
+import dotenv
 import torch.nn as nn
 import wandb
 from sklearn.metrics import classification_report
@@ -23,6 +24,10 @@ torch.backends.cudnn = True
 def main():
     # Parse arguments
     args = parse_args()
+    if os.path.isfile(args.dot_env_path):
+        dotenv.load_dotenv(args.dot_env_path)
+    else:
+        print("Warning! No .env file found.")
     pl.seed_everything(args.random_seed, workers=True)
 
     if not os.path.isdir(args.run_output_dir):
