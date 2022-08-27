@@ -1,9 +1,9 @@
 # Imports
 import argparse
-from datetime import datetime
+import os
+
 from utils import defines
 from utils.utils import get_checkpoint_path, args_sanity_check
-import os
 
 
 def parse_args():

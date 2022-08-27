@@ -1,26 +1,18 @@
 # from __future__ import print_function, division
 import os
+
+import dotenv
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-import torch
-import dotenv
-import torch.nn as nn
-import wandb
-from sklearn.metrics import classification_report
 
 from data.datamodules import ImageNetDataModule, StylizedImageNetDataModule, OODStylizedImageNetDataModule
-from default_train import model_default_train, model_save_load, model_default_train_m
-from models.model_definer import define_backbone
 from models.lightning_model import LightningModel
+from models.model_definer import define_backbone
 from utils.args import parse_args
 from utils.utils import freemem, get_dataloaders, get_device
-from visualization.visual import visualize_loss_acc, shape_bias, confusion_matrix_hm, visualize_model, eval_test
-
-torch.backends.cudnn = True
 
 
-# main function
 def main():
     # Parse arguments
     args = parse_args()

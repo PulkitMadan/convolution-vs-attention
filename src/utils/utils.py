@@ -1,7 +1,8 @@
+import glob
+import os
+
 import pytorch_lightning as pl
 import torch
-import os
-import glob
 
 
 def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
@@ -25,7 +26,6 @@ def get_dataloaders(args, imagenet_module: pl.LightningDataModule,
         train_loader = stylized_imagenet_module.train_dataloader()
     elif args.train_loader == 'ood_stylized_imagenet':
         train_loader = ood_stylized_imagenet_module.train_dataloader()
-
 
     # Define val loader
     if args.val_loader == 'imagenet':

@@ -17,7 +17,9 @@ pretrained on but allows better performance when generalizing towards other task
 classification where both local and global representations are important (Codella et al., 2019).
 
 We also introduce a smaller version of stylized-ImageNet, one that is similar in spirit to TinyImageNet (Le et Yang.,
+
 2015)
+
 in terms of the number of classes and number of sample per class, but differs in that it consists of full resolution
 images.
 
