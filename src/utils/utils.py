@@ -57,12 +57,13 @@ def args_sanity_check(args) -> None:
 
     if args.do_train and not args.resume_run:
         assert not os.path.isdir(
-            args.run_output_dir), f'Attempting to train a new model but {args.run_output_dir} already exists. Verify run_id.'
+            args.run_output_dir), f'Attempting to train a new model but {args.run_output_dir} already exists.'
 
     # If resuming, output dir & checkpoint file should exist
     if args.resume_run:
         assert os.path.isdir(
             args.run_output_dir), f'--resume flag used but {args.run_output_dir} is not a valid dir. Verify run_id.'
+        # TODO verify mechanism to handle checkpoint path
         assert os.path.isfile(
             args.checkpoint_path), f'--resume flag used but checkpoint has not been found in  {args.checkpoint_path}. Verify run_id.'
         assert args.do_train, f'--resume flag used should always be used in tandem with --do_train. Inconsistent run parameters.'

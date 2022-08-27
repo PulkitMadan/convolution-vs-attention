@@ -1,6 +1,7 @@
 # Imports
 import argparse
 import os
+from datetime import datetime
 
 from utils import defines
 from utils.utils import get_checkpoint_path, args_sanity_check
@@ -31,6 +32,7 @@ def parse_args():
 
     parser.add_argument(
         "--run_id",
+        default=None,
         type=str,
         help="Provide a unique run_id. Standard should be modelname_number.",
     )
@@ -129,6 +131,9 @@ def parse_args():
 
     # Parse, set seed and print args
     args = parser.parse_args()
+    if args.run_id is None:
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H:%M')
+        args.run_id = f'{args.model}-{timestamp}'
     args.run_output_dir = os.path.join(args.root_runs_output, args.run_id)
     args.checkpoint_path = get_checkpoint_path(args)
     args_sanity_check(args)
